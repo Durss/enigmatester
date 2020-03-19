@@ -39,6 +39,7 @@ export default class FileSelector extends Vue {
 	public carousel:HTMLDivElement = null;
 	
 	private dragging:boolean = false;
+	private dragStart:{x:number, y:number} = {x:0, y:0};
 	private dragOffset:{x:number, y:number} = {x:0, y:0};
 	private radius:number = 80;
 	private center:{x:number, y:number} = {x:0, y:0};
@@ -118,9 +119,20 @@ export default class FileSelector extends Vue {
 			this.$store.state.alert = "You can't select more than "+this.maxFilesOpened+" files !<br />Please do some cleanup to select another one thanks :)";
 			return;
 		}
+		//Sheet already opened ?
+		if(this.selectedSheets.indexOf(key) > -1) {
+			this.unselect(key);
+			return;
+		}
+		
+		let dragDist = Math.sqrt(Math.pow(this.dragStart.x - this.dragOffset.x, 2) + Math.pow(this.dragStart.y - this.dragOffset.y, 2));
+		if(dragDist > 5) return;//avoid selecting a file if we dragged the carousel
+
 		for (let i = 0; i < this.keys.length; i++) {
 			if(this.keys[i] == key) {
-				this.keys.splice(i, 1);
+				// this.keys.splice(i, 1);
+				const img = <HTMLImageElement>this.$refs["sheet_"+key][0];
+				img.style.opacity = ".9";
 			}
 		}
 		this.selectedSheets.push(key);
@@ -138,7 +150,9 @@ export default class FileSelector extends Vue {
 				this.selectedSheets.splice(i, 1);
 			}
 		}
-		this.keys.push(key);
+		const img = <HTMLImageElement>this.$refs["sheet_"+key][0];
+		img.style.opacity = "1";
+		// this.keys.push(key);
 		this.keys.sort();
 
 		//Round carousel to proper position
@@ -166,7 +180,8 @@ export default class FileSelector extends Vue {
 		let step = (Math.PI*2)/(this.keys.length);
 		let locAngle = this.angleInterp - Math.PI/2;// + step/this.keys.length*5;
 		for (let i = 0; i < this.keys.length; i++) {
-			const img = <HTMLImageElement>this.$refs["sheet_"+this.keys[i]][0];
+			let key = this.keys[i];
+			const img = <HTMLImageElement>this.$refs["sheet_"+key][0];
 			
 			let inc = i*step;
 
@@ -188,7 +203,11 @@ export default class FileSelector extends Vue {
 			//Fade background items
 			let fadeRatio = .55;// 0 < fadeRatio < 1
 			let b = Math.max(0,(z/180-fadeRatio)) * 100 * 1/(1-fadeRatio);
-			img.style.filter = "brightness("+b+"%)";
+			let filter = "brightness("+b+"%)";
+			if(this.selectedSheets.indexOf(key) > -1) {
+				filter = "brightness("+(b+20)+"%) saturate(0)";
+			}
+			img.style.filter = filter;
 		}
 	}
 
@@ -204,8 +223,8 @@ export default class FileSelector extends Vue {
 	 */
 	private onMouseDown(event:MouseEvent):void {
 		let bounds = this.$el.getBoundingClientRect();
-		this.dragOffset.x = event.clientX - bounds.left;
-		this.dragOffset.y = event.clientY - bounds.top;
+		this.dragOffset.x = this.dragStart.x = event.clientX - bounds.left;
+		this.dragOffset.y = this.dragStart.y = event.clientY - bounds.top;
 		this.dragging = true;
 	}
 
@@ -253,7 +272,7 @@ export default class FileSelector extends Vue {
 		cursor: pointer;
 		transition: margin-top .25s;
 		&:hover {
-			// margin-top: -50px;
+			margin-top: -50px;
 		}
 	}
 	.imageSelected {

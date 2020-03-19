@@ -55,6 +55,7 @@ export default class Box3D extends Vue {
 		//   level : 10
 		//   blur/sharp : -1.5
 		//   filter : sobel
+		//   Invert : height
 		var cubeMaterials = [
 			new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load(require('@/assets/textures/right.png')),
@@ -106,13 +107,41 @@ export default class Box3D extends Vue {
 			}),
 		];
 
+		//Disable mipmaps & stuff to avoid "non power of 2 texture size blabla"
+		for (let i = 0; i < cubeMaterials.length; i++) {
+			const m = cubeMaterials[i];
+			m.map.generateMipmaps = false;
+			m.map.wrapS = m.map.wrapT = THREE.ClampToEdgeWrapping;
+			m.map.minFilter = THREE.LinearFilter;
+			
+			if(m.lightMap) {
+				m.lightMap.generateMipmaps = false;
+				m.lightMap.wrapS = m.lightMap.wrapT = THREE.ClampToEdgeWrapping;
+				m.lightMap.minFilter = THREE.LinearFilter;
+			}
+			
+			if(m.bumpMap) {
+				m.bumpMap.generateMipmaps = false;
+				m.bumpMap.wrapS = m.bumpMap.wrapT = THREE.ClampToEdgeWrapping;
+				m.bumpMap.minFilter = THREE.LinearFilter;
+			}
+			
+			if(m.specularMap) {
+				m.specularMap.generateMipmaps = false;
+				m.specularMap.wrapS = m.specularMap.wrapT = THREE.ClampToEdgeWrapping;
+				m.specularMap.minFilter = THREE.LinearFilter;
+			}
+		}
+
 		this._scene = new THREE.Scene()
 		this._camera = new THREE.PerspectiveCamera(75, width/height, 1, 10000);
 		this._camera.position.z = this.cameraDistance;
 		this._renderer = new THREE.WebGLRenderer({ alpha: true, antialias:true });
 		this._renderer.setSize(width, height);
-		let ratio = 0.69597615499254843517138599105812;
-		this._cubeGeom = new THREE.BoxGeometry(150*ratio, 150, 150*ratio);
+		let sideRatio = 0.69597615499254843517138599105812;
+		let cubeH = 150;
+		let cubeW = cubeH*sideRatio;
+		this._cubeGeom = new THREE.BoxGeometry(cubeW, cubeH, cubeW);
 		this._cube = new THREE.Mesh(this._cubeGeom, cubeMaterials);
 		
 		this._spotlight = new THREE.SpotLight(0xffffff, 1);
@@ -138,6 +167,21 @@ export default class Box3D extends Vue {
 		this._scene.add(this._cube);
 		this._canvas = this._renderer.domElement
 		this.$el.appendChild(this._canvas);
+
+		this.cameraDistance = 100;
+		let h;
+		let loopCount = 0;
+		//Step back camera until the box has the proper visual size so
+		//the files and the reticle will match perfectly
+		do {
+			this.cameraDistance ++;
+			let distanceToFrontFace = this.cameraDistance - cubeW * .5;
+			let vFOV = THREE.MathUtils.degToRad( this._camera.fov );
+			h = 2 * Math.tan( vFOV / 2 ) * distanceToFrontFace;
+			h = cubeH/h * document.body.clientHeight;
+		}while(h > 672 || ++loopCount > 10000)
+		
+
 
 		//Intro animation
 		if(Config.ENABLE_INTRO_ANIMATIONS) {

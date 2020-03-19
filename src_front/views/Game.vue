@@ -4,6 +4,7 @@
 			<h1>{{$store.state.room.name}}</h1>
 		</div>
 		<UserList />
+		<Reticle />
 		<Box3D :playerIndex="playerIndex" />
 		<FileSelector :playerIndex="playerIndex" />
 	</div>
@@ -15,10 +16,12 @@ import UserList from '../components/UserList.vue';
 import Box3D from '../components/Box3D.vue';
 import FileSelector from '../components/FileSelector.vue';
 import UserData from '../vo/UserData';
+import Reticle from '../components/Reticle.vue';
 
 @Component({
 	components:{
 		Box3D,
+		Reticle,
 		UserList,
 		FileSelector,
 	}

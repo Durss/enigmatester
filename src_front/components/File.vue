@@ -66,8 +66,8 @@ export default class File extends Vue {
 		if(event.ctrlKey) speed *= 5;
 		if(event.shiftKey) speed /= 10;
 		this.zoom -= Math.abs(event.deltaY)/event.deltaY * .1 * speed;
-		this.zoom = Math.min(Math.max(.2, this.zoom),2);
-		event.preventDefault();
+		this.zoom = Math.min(Math.max(.2, this.zoom),1);
+		// event.preventDefault();
 	}
 
 	/**
@@ -117,7 +117,7 @@ export default class File extends Vue {
 		position: absolute;
 		z-index: 100;
 		transform: translate(-50%, -50%);
-		opacity: .8;
+		// opacity: .8;
 		transition: transform .2s;
 	}
 }
