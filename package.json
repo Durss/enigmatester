@@ -1,0 +1,39 @@
+{
+  "name": "irisbox",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run front/build && npm run server/build",
+    "front/serve": "vue-cli-service serve",
+    "front/watch": "npm run front/serve",
+    "front/build": "vue-cli-service build",
+    "server/watch": "tsc -w -p ./tsconfig_server.json",
+    "server/build": "tsc -p ./tsconfig_server.json"
+  },
+  "dependencies": {
+    "express-serve-static-core": "^0.1.1",
+    "uuid": "^7.0.2",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.2",
+    "vue-property-decorator": "^8.3.0",
+    "vue-router": "^3.1.5",
+    "vuex": "^3.1.2"
+  },
+  "devDependencies": {
+    "@types/three": "^0.103.2",
+    "@vue/cli-plugin-router": "^4.2.0",
+    "@vue/cli-plugin-typescript": "^4.2.0",
+    "@vue/cli-plugin-vuex": "^4.2.0",
+    "@vue/cli-service": "^4.2.0",
+    "gsap": "^3.2.4",
+    "less": "^3.0.4",
+    "less-loader": "^5.0.0",
+    "three": "^0.114.0",
+    "typescript": "~3.7.5",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ]
+}
