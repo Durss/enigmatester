@@ -101,6 +101,7 @@ export default class HTTPServer {
 			let user:UserData = {
 				id:uuidv4(),
 				name:userName,
+				index:0,
 			};
 			let room = this._rooms[roomName.toLowerCase()];
 			let created = false;
@@ -113,6 +114,7 @@ export default class HTTPServer {
 					users:[user]
 				}
 			}else if(room.users.length < 3) {
+				user.index = room.users.length;
 				room.users.push(user);
 			}else{
 				res.status(301).send(JSON.stringify({success:false, code:"ROOM_FULL", message:"Room is already full"}));

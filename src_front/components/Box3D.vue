@@ -7,16 +7,24 @@
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
 import * as THREE from "three";
 import Utils from '../utils/Utils';
+import gsap from 'gsap';
+import { SlowMo, RoughEase, CustomEase } from 'gsap/all';
+import Config from '../utils/Config';
 
 @Component({
 	components:{}
 })
 export default class Box3D extends Vue {
+
+	@Prop()
+	public playerIndex:number;
+
 	public _disposed:boolean = false;
 
 	private inc:number = 0;
+	private intro:boolean = false;
 	private dragging:boolean = false;
-	private cameraDistance:number = 200;
+	private cameraDistance:number = 180;
 	private dragOffset:{x:number, y:number} = {x:0, y:0};
 	private angleH:number = Math.PI;
 	private angleHInterp:number = this.angleH;
@@ -39,17 +47,19 @@ export default class Box3D extends Vue {
 		let width = this.$el.clientWidth;
 		let height = this.$el.clientHeight;
 		let specular = new THREE.Color(0x888888);
-		let element = "water";
+		let element = ["fire", "water", "earth"][this.playerIndex];
 		//Generate normal_maps via this tool :
 		// https://cpetry.github.io/NormalMap-Online/
 		// values :
-		// strength : 1
-		// level : 10
-		// blur/sharp : -1.5
-		// filter : sovel
+		//   strength : 1
+		//   level : 10
+		//   blur/sharp : -1.5
+		//   filter : sobel
 		var cubeMaterials = [
 			new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load(require('@/assets/textures/right.png')),
+				lightMap: new THREE.TextureLoader().load(require('@/assets/textures/right_bump.jpg')),
+				lightMapIntensity:1,
 				bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/right_normal.png')),
 				bumpScale:1,
 				specularMap: new THREE.TextureLoader().load(require('@/assets/textures/right_bump.jpg')),
@@ -57,6 +67,8 @@ export default class Box3D extends Vue {
 			}),
 			new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load(require('@/assets/textures/left.png')),
+				lightMap: new THREE.TextureLoader().load(require('@/assets/textures/left_bump.jpg')),
+				lightMapIntensity:1,
 				bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/left_normal.png')),
 				bumpScale:1,
 				specularMap: new THREE.TextureLoader().load(require('@/assets/textures/left_bump.jpg')),
@@ -76,6 +88,8 @@ export default class Box3D extends Vue {
 			}),
 			new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load(require('@/assets/textures/front_'+element+'.png')),
+				lightMap: new THREE.TextureLoader().load(require('@/assets/textures/front_'+element+'_bump.jpg')),
+				lightMapIntensity:1,
 				bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/front_'+element+'_normal.png')),
 				bumpScale:1,
 				specularMap: new THREE.TextureLoader().load(require('@/assets/textures/front_'+element+'_bump.jpg')),
@@ -83,6 +97,8 @@ export default class Box3D extends Vue {
 			}),
 			new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load(require('@/assets/textures/back.png')),
+				lightMap: new THREE.TextureLoader().load(require('@/assets/textures/back_bump.jpg')),
+				lightMapIntensity:1,
 				bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/back_normal.png')),
 				bumpScale:1,
 				specularMap: new THREE.TextureLoader().load(require('@/assets/textures/back_bump.jpg')),
@@ -95,7 +111,8 @@ export default class Box3D extends Vue {
 		this._camera.position.z = this.cameraDistance;
 		this._renderer = new THREE.WebGLRenderer({ alpha: true, antialias:true });
 		this._renderer.setSize(width, height);
-		this._cubeGeom = new THREE.BoxGeometry(100, 150, 100);
+		let ratio = 0.69597615499254843517138599105812;
+		this._cubeGeom = new THREE.BoxGeometry(150*ratio, 150, 150*ratio);
 		this._cube = new THREE.Mesh(this._cubeGeom, cubeMaterials);
 		
 		this._spotlight = new THREE.SpotLight(0xffffff, 1);
@@ -121,6 +138,24 @@ export default class Box3D extends Vue {
 		this._scene.add(this._cube);
 		this._canvas = this._renderer.domElement
 		this.$el.appendChild(this._canvas);
+
+		//Intro animation
+		if(Config.ENABLE_INTRO_ANIMATIONS) {
+			this.intro = true;
+			this._camera.position.y = 2000;
+			this.cameraDistance = 1500;
+			gsap.registerPlugin(SlowMo, RoughEase, CustomEase);
+			gsap.to(this, {duration:3, cameraDistance:200, ease:"sine.inOut"});
+			gsap.to(this, {duration:4,
+							angleH:Math.PI*2.5,
+							ease:CustomEase.create("custom", "M0,0,C0.194,0.126,0.29,0.4,0.33,0.52,0.366,0.63,0.483,1.027,0.67,1.028,0.768,1.028,0.804,0.966,1,1"),
+							onComplete:_=> {
+								this.intro = false;
+							}});
+			gsap.to(this._camera.position, {duration:4, y:0, ease:"back.out(1.5)"});
+		}else{
+			this.angleH = this.angleHInterp -= Math.PI/2;
+		}
 
 		this.renderWebgl();
 		
@@ -167,10 +202,15 @@ export default class Box3D extends Vue {
 		}else {
 			return;
 		}
+
+		if(this.intro) {
+			this.angleHInterp = this.angleH;
+		}else{
+			let a = this.angleH - this.angleHInterp;
+			a = (a) % Math.PI*2;
+			this.angleHInterp += a * .1;
+		}
 		
-		let a = this.angleH - this.angleHInterp;
-		a = (a + Math.PI) % Math.PI*2 - Math.PI;
-		this.angleHInterp += a * .1;
 		
 		this._camera.position.x = Math.cos(this.angleHInterp) * this.cameraDistance;
 		this._camera.position.z = Math.sin(this.angleHInterp) * this.cameraDistance;
@@ -218,7 +258,7 @@ export default class Box3D extends Vue {
 	}
 
 	private onMouseDown(event:MouseEvent):void {
-		if(event.target != this._canvas) return;
+		if(event.target != this._canvas || this.intro) return;
 		let bounds = this.$el.getBoundingClientRect();
 		this.dragOffset.x = event.clientX - bounds.left;
 		this.dragOffset.y = event.clientY - bounds.top;
@@ -226,12 +266,13 @@ export default class Box3D extends Vue {
 	}
 
 	private onMouseUp(event:MouseEvent):void {
+		if(this.intro) return;
 		this.dragging = false;
 		this.angleH = Math.round(this.angleH/(Math.PI/2))*Math.PI/2;
 	}
 
 	private onMouseMove(event:MouseEvent):void {
-		if(!this.dragging) return;
+		if(!this.dragging || this.intro) return;
 		let bounds = this.$el.getBoundingClientRect();
 		let px = event.clientX - bounds.left;
 		let py = event.clientY - bounds.top;
@@ -254,5 +295,9 @@ export default class Box3D extends Vue {
 	width: 100%;
 	height: 100%;
 	user-select: none;
+	cursor: grab;
+	&:active {
+		cursor: grabbing;
+	}
 }
 </style>

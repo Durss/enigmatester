@@ -22,7 +22,10 @@ import Alert from "./views/AlertView.vue";
 export default class App extends Vue {
 
 	public mounted():void {
-		
+		(<HTMLElement>this.$el).addEventListener("wheel", (e:MouseWheelEvent)=> {
+			console.log("ok")
+			if(e.ctrlKey) e.preventDefault();
+		})
 	}
 
 	public beforeDestroy():void {

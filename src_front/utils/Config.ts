@@ -5,6 +5,7 @@
 export default class Config {
 
 	public static IS_PROD:boolean = /.*\.(com|fr|net|org|ninja)$/gi.test(window.location.hostname) || window.location.hostname.indexOf("192.168") > -1;
+	public static ENABLE_INTRO_ANIMATIONS:boolean = false;
 	public static STORAGE_VERSION:number = 1;
 	
 	private static _ENV_NAME: EnvName;
