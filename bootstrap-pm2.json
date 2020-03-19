@@ -1,6 +1,6 @@
 {
   "script": ".\\server/bootstrap.js",
-  "name": "IrisBox",
+  "name": "EnigmaTester",
   "env": {},
   "merge_logs": true,
   "vizion": true,

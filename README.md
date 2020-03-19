@@ -1,19 +1,27 @@
-# irisbox
+# Enigma tester
 
 ## Project setup
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### Run server with live reload
 ```
-npm run serve
+npm run server/watch
 ```
 
-### Compiles and minifies for production
+### Run front with live reload
+```
+npm run front/watch
+```
+
+### Build project
 ```
 npm run build
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Run as a service
+Install PM2 globally, then :
+```
+pm2 start bootstrap-pm2.json
+```
