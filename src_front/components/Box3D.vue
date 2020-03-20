@@ -61,8 +61,8 @@ export default class Box3D extends Vue {
 				map: new THREE.TextureLoader().load(require('@/assets/textures/right.png')),
 				lightMap: new THREE.TextureLoader().load(require('@/assets/textures/right_bump.jpg')),
 				lightMapIntensity:1,
-				bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/right_normal.png')),
-				bumpScale:1,
+				normalMap: new THREE.TextureLoader().load(require('@/assets/textures/right_normal.png')),
+				normalScale: new THREE.Vector2(.5,.5),
 				specularMap: new THREE.TextureLoader().load(require('@/assets/textures/right_bump.jpg')),
 				specular,
 			}),
@@ -70,20 +70,20 @@ export default class Box3D extends Vue {
 				map: new THREE.TextureLoader().load(require('@/assets/textures/left.png')),
 				lightMap: new THREE.TextureLoader().load(require('@/assets/textures/left_bump.jpg')),
 				lightMapIntensity:1,
-				bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/left_normal.png')),
-				bumpScale:1,
+				normalMap: new THREE.TextureLoader().load(require('@/assets/textures/left_normal.png')),
+				normalScale: new THREE.Vector2(.5,.5),
 				specularMap: new THREE.TextureLoader().load(require('@/assets/textures/left_bump.jpg')),
 				specular,
 			}),
 			new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load(require('@/assets/textures/top.png')),
-				// bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/top_bump.jpg')),
+				// normalMap: new THREE.TextureLoader().load(require('@/assets/textures/top_bump.jpg')),
 				// specularMap: new THREE.TextureLoader().load(require('@/assets/textures/top_bump.jpg')),
 				// specular,
 			}),
 			new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load(require('@/assets/textures/bottom.png')),
-				// bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/bottom_bump.jpg')),
+				// normalMap: new THREE.TextureLoader().load(require('@/assets/textures/bottom_bump.jpg')),
 				// specularMap: new THREE.TextureLoader().load(require('@/assets/textures/bottom_bump.jpg')),
 				// specular,
 			}),
@@ -91,8 +91,8 @@ export default class Box3D extends Vue {
 				map: new THREE.TextureLoader().load(require('@/assets/textures/front_'+element+'.png')),
 				lightMap: new THREE.TextureLoader().load(require('@/assets/textures/front_'+element+'_bump.jpg')),
 				lightMapIntensity:1,
-				bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/front_'+element+'_normal.png')),
-				bumpScale:1,
+				normalMap: new THREE.TextureLoader().load(require('@/assets/textures/front_'+element+'_normal.png')),
+				normalScale: new THREE.Vector2(.5,.5),
 				specularMap: new THREE.TextureLoader().load(require('@/assets/textures/front_'+element+'_bump.jpg')),
 				specular,
 			}),
@@ -100,8 +100,8 @@ export default class Box3D extends Vue {
 				map: new THREE.TextureLoader().load(require('@/assets/textures/back.png')),
 				lightMap: new THREE.TextureLoader().load(require('@/assets/textures/back_bump.jpg')),
 				lightMapIntensity:1,
-				bumpMap: new THREE.TextureLoader().load(require('@/assets/textures/back_normal.png')),
-				bumpScale:1,
+				normalMap: new THREE.TextureLoader().load(require('@/assets/textures/back_normal.png')),
+				normalScale: new THREE.Vector2(.5,.5),
 				specularMap: new THREE.TextureLoader().load(require('@/assets/textures/back_bump.jpg')),
 				specular,
 			}),
@@ -120,10 +120,10 @@ export default class Box3D extends Vue {
 				m.lightMap.minFilter = THREE.LinearFilter;
 			}
 			
-			if(m.bumpMap) {
-				m.bumpMap.generateMipmaps = false;
-				m.bumpMap.wrapS = m.bumpMap.wrapT = THREE.ClampToEdgeWrapping;
-				m.bumpMap.minFilter = THREE.LinearFilter;
+			if(m.normalMap) {
+				m.normalMap.generateMipmaps = false;
+				m.normalMap.wrapS = m.normalMap.wrapT = THREE.ClampToEdgeWrapping;
+				m.normalMap.minFilter = THREE.LinearFilter;
 			}
 			
 			if(m.specularMap) {
