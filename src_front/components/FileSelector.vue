@@ -91,15 +91,15 @@ export default class FileSelector extends Vue {
 		this.carousel = <HTMLDivElement>this.$refs.carousel;
 		this.carousel.addEventListener("mousedown", this._mouseDownHandler);
 		document.addEventListener("mouseup", this._mouseUpHandler);
-		this.carousel.addEventListener("mousemove", this._mouseMoveHandler);
+		document.addEventListener("mousemove", this._mouseMoveHandler);
 		this.carousel.addEventListener("wheel", this._mouseWheelHandler);
 	}
 
 	public beforeDestroy():void {
 		this.disposed = true;
 		this.carousel.removeEventListener("mousedown", this._mouseDownHandler);
-		document.removeEventListener("mouseUp", this._mouseUpHandler);
-		this.carousel.removeEventListener("mouseMove", this._mouseMoveHandler);
+		document.removeEventListener("mouseup", this._mouseUpHandler);
+		document.removeEventListener("mousemove", this._mouseMoveHandler);
 		this.carousel.removeEventListener("wheel", this._mouseWheelHandler);
 	}
 
