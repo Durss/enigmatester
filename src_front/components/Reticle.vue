@@ -1,5 +1,5 @@
 <template>
-	<div class="reticle" :style="style">
+	<div class="reticle">
 		<div ref="start" :style="styleStart" class="part">
 			<img src="@/assets/reticle/1.svg" draggable="false">
 			<div class="pivot pivot1" ref="pivotStart1"></div>
@@ -14,6 +14,7 @@
 			<img src="@/assets/reticle/3.svg" draggable="false">
 			<div class="pivot pivot1" ref="pivotEnd1"></div>
 		</div>
+		<img src="@/assets/icons/move.svg" class="move" ref="move" :style="styleMove" draggable="false">
 	</div>
 </template>
 
@@ -25,12 +26,10 @@ import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-propert
 })
 export default class Reticle extends Vue {
 
-	public get style():any {
+	public get styleMove():any {
 		return {
-			// left: this.posAll.x+"px",
-			// top: this.posAll.y+"px",
-			// transform: "rotate("+this.angleAll+"rad)",
-			// transformOrigin: this.pivotAll.x+"px "+this.pivotAll.y+"px",
+			left: this.posMove.x+"px",
+			top: this.posMove.y+"px",
 		}
 	}
 
@@ -39,7 +38,6 @@ export default class Reticle extends Vue {
 			left: this.posAll.x+"px",
 			top: this.posAll.y+"px",
 			transform: "rotate("+this.angleAll+"rad)",
-			// transformOrigin: this.pivotAll.x+"px "+this.pivotAll.y+"px",
 		}
 	}
 
@@ -56,7 +54,6 @@ export default class Reticle extends Vue {
 			left: this.posEnd.x+"px",
 			top: this.posEnd.y+"px",
 			transform: "rotate("+this.angleB+"rad)",
-			// transformOrigin: this.pivotB.x+"px "+this.pivotB.y+"px",
 		}
 	}
 	
@@ -68,15 +65,16 @@ export default class Reticle extends Vue {
 	private rotateAll:boolean = false;
 	private posMiddle:{x:number, y:number} = {x:0, y:0};
 	private posEnd:{x:number, y:number} = {x:0, y:0};
-	private posAll:{x:number, y:number} = {x:400, y:400};
+	private posMove:{x:number, y:number} = {x:0, y:0};
+	private posAll:{x:number, y:number} = {x:100, y:document.body.clientHeight/2 + 200};
 	private dragOffset:{x:number, y:number} = {x:0, y:0};
-	private angleA:number = 0;
+	private angleA:number = Math.PI/2;
 	private valueA:number = 0;
 	private angleAOffset:number = 0;
-	private angleB:number = 0;
+	private angleB:number = Math.PI/2;
 	private valueB:number = 0;
 	private angleBOffset:number = 0;
-	private angleAll:number = Math.PI*0;
+	private angleAll:number = Math.PI/2;
 	
 	private _mouseDownHandler:any;
 	private _mouseUpHandler:any;
@@ -106,22 +104,23 @@ export default class Reticle extends Vue {
 	 * Start dragging carousel
 	 */
 	private onMouseDown(event:MouseEvent):void {
-		if(event.buttons == 2) {
-			this.rotateAll = true;
-		}else
 		if(event.target == this.$refs.middle) {
 			this.rotateA = true;
 			this.angleAOffset = this.getMouseAngleA(event.clientX, event.clientY);
 		}else 
-		if(event.target == this.$refs.start) {
+		if(event.target == this.$refs.move) {
 			this.dragging = true;
 			this.dragOffset.x = event.clientX;
 			this.dragOffset.y = event.clientY;
+		}else 
+		if(event.target == this.$refs.start) {
+			this.rotateAll = true;
 		}else 
 		if(event.target == this.$refs.end) {
 			this.rotateB = true;
 			this.angleAOffset = this.getMouseAngleB(event.clientX, event.clientY);
 		}
+		this.onMouseMove(event);
 	}
 
 	/**
@@ -162,6 +161,16 @@ export default class Reticle extends Vue {
 			this.posAll.x += (px-this.dragOffset.x);
 			this.posAll.y += (py-this.dragOffset.y);
 
+			let margin = 50;
+			let w = 224;
+			let h = 115;
+			let sw = document.body.clientWidth;
+			let sh = document.body.clientHeight;
+			if(this.posAll.x < margin - w) this.posAll.x = margin - w;
+			if(this.posAll.y < margin - h) this.posAll.y = margin - h;
+			if(this.posAll.x > sw - margin - w) this.posAll.x = sw - margin - w;
+			if(this.posAll.y > sh - margin - h) this.posAll.y = sh - margin - h;
+
 			this.dragOffset.x = px;
 			this.dragOffset.y = py;
 		}
@@ -186,7 +195,7 @@ export default class Reticle extends Vue {
 			if(this.valueB>9) this.valueB -= 16;
 			this.valueB = Math.min(Math.max(1, this.valueB), 9);
 		}
-		console.log(this.valueA, this.valueB);
+		
 
 		if(this.rotateAll) {
 			let before = this.angleAll;
@@ -215,6 +224,11 @@ export default class Reticle extends Vue {
 		pivot2 = (<HTMLDivElement>this.$refs.pivotEnd1).getBoundingClientRect();
 		this.posEnd.x = pivot1.x - 197.8;
 		this.posEnd.y = pivot1.y - 56.7;
+
+		let move = <HTMLImageElement>this.$refs.move;
+		let pivot = (<HTMLDivElement>this.$refs.pivotStart1).getBoundingClientRect();
+		this.posMove.x = pivot.x + Math.cos(this.angleAll) * 50;
+		this.posMove.y = pivot.y + Math.sin(this.angleAll) * 50;
 	}
 
 }
@@ -226,8 +240,25 @@ export default class Reticle extends Vue {
 	left: 0;
 	top: 0;
 	z-index: 2;
+	width: 100%;
+	height: 100%;
 	user-select: none;
-	background-color: white;
+
+	.move {
+		position: absolute;
+		z-index: 3;
+		width: 20px;
+		height: 20px;
+		transform: translate(-50%, -50%);
+		padding: 20px;
+		cursor: pointer;
+		transition: transform .25s;
+		&:hover {
+		transform: translate(-50%, -50%) scale(1.25);
+		}
+	}
+
+	//Only used for debugging
 	.pivot {
 		position: absolute;
 		z-index: 1000;
