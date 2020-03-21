@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev": "concurrently --kill-others \"npm run front/watch\" \"npm run server/watch\"",
     "build": "npm run front/build && npm run server/build",
     "front/serve": "vue-cli-service serve",
     "front/watch": "npm run front/serve",
@@ -11,6 +12,7 @@
     "server/build": "tsc -p ./tsconfig_server.json"
   },
   "dependencies": {
+    "concurrently": "^5.1.0",
     "express-serve-static-core": "^0.1.1",
     "uuid": "^7.0.2",
     "vue": "^2.6.11",

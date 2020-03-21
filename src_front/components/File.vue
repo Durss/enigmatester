@@ -53,8 +53,8 @@ export default class File extends Vue {
 	public beforeDestroy():void {
 		this.disposed = true;
 		this.$el.removeEventListener("mousedown", this._mouseDownHandler);
-		document.removeEventListener("mouseUp", this._mouseUpHandler);
-		document.removeEventListener("mouseMove", this._mouseMoveHandler);
+		document.removeEventListener("mouseup", this._mouseUpHandler);
+		document.removeEventListener("mousemove", this._mouseMoveHandler);
 		this.$el.removeEventListener("wheel", this._mouseWheelHandler);
 	}
 
