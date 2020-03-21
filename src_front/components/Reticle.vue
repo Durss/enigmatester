@@ -161,14 +161,14 @@ export default class Reticle extends Vue {
 			this.posAll.x += (px-this.dragOffset.x);
 			this.posAll.y += (py-this.dragOffset.y);
 
-			let margin = 50;
+			let margin = 100;
 			let w = 224;
-			let h = 115;
+			let h = 40;
 			let sw = document.body.clientWidth;
 			let sh = document.body.clientHeight;
 			if(this.posAll.x < margin - w) this.posAll.x = margin - w;
-			if(this.posAll.y < margin - h) this.posAll.y = margin - h;
-			if(this.posAll.x > sw - margin - w) this.posAll.x = sw - margin - w;
+			if(this.posAll.y < margin/2 - h) this.posAll.y = margin/2 - h;
+			if(this.posAll.x > sw - margin/2 - w) this.posAll.x = sw - margin/2 - w;
 			if(this.posAll.y > sh - margin - h) this.posAll.y = sh - margin - h;
 
 			this.dragOffset.x = px;
@@ -240,8 +240,6 @@ export default class Reticle extends Vue {
 	left: 0;
 	top: 0;
 	z-index: 2;
-	width: 100%;
-	height: 100%;
 	user-select: none;
 
 	.move {
@@ -254,7 +252,7 @@ export default class Reticle extends Vue {
 		cursor: pointer;
 		transition: transform .25s;
 		&:hover {
-		transform: translate(-50%, -50%) scale(1.25);
+			transform: translate(-50%, -50%) scale(1.25);
 		}
 	}
 
