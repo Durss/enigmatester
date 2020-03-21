@@ -3,6 +3,7 @@ import * as SockJS from "sockjs-client";
 import Config from "../utils/Config";
 import SocketEvent from "../vo/SocketEvent";
 import store from '@/store';
+import UserData from '@/vo/UserData';
 
 /**
  * Created by FDursus on 28/03/2019
@@ -12,7 +13,7 @@ export default class SockController extends EventDispatcher {
 
 	private static _instance: SockController;
 
-	private _uid: string;
+	private _user: UserData;
 	private _sockjs: any;
 	private _timeout: number;
 	private _pingInterval: number;
@@ -32,10 +33,11 @@ export default class SockController extends EventDispatcher {
 		return SockController._instance;
 	}
 
-	public set uid(value:string) {
-		this._uid = value;
+	public set user(value:UserData) {
+		this._user = value;
 		if(this._connected) {
-			this.sendMessage({action:SOCK_ACTIONS.LOGIN, data:value});
+			this.registerCurrentUser();
+		}else{
 		}
 	}
 
@@ -53,13 +55,15 @@ export default class SockController extends EventDispatcher {
 		this._sockjs.onmessage = (message:string)=> this.onMessage(message);
 		this._sockjs.onopen = ()=> this.onConnect();
 
-		window.addEventListener('beforeunload', _=> this.disconnect());
+		// window.addEventListener('beforeunload', _=> this.disconnect());
 	}
 
 	public disconnect() {
 		if(this._connected) {
 			try {
-				this._sockjs.send(JSON.stringify({action:SOCK_ACTIONS.DISCONNECT}));
+				if(this._user) {
+					this._sockjs.send(JSON.stringify({action:SOCK_ACTIONS.LEAVE_ROOM, data:this._user}));
+				}
 			}catch(e) {
 				//Ignore..
 			}
@@ -83,14 +87,19 @@ export default class SockController extends EventDispatcher {
 	private initialize(): void {
 	}
 
+	private registerCurrentUser():void {
+		this.sendMessage({action:SOCK_ACTIONS.DEFINE_UID, data:this._user});
+		this.sendMessage({action:SOCK_ACTIONS.JOIN_ROOM, data:this._user});
+	}
+
 	private onConnect():void {
 		this._connected = true;
 		this._attempts = 0;
 		
 		clearInterval(<any>this._pingInterval);
 		this._pingInterval = <any>setInterval(_=>this.ping(), 30000);
-		if(this._uid) {
-			this.sendMessage({action:SOCK_ACTIONS.LOGIN, data:this._uid});
+		if(this._user) {
+			this.registerCurrentUser();
 		}
 	}
 
@@ -107,11 +116,14 @@ export default class SockController extends EventDispatcher {
 
 	private onMessage(message:any):void {
 		let json:any = JSON.parse(message.data);
-		console.log("Sock message");
-		console.log(json);
+		// console.log("Sock message");
+		// console.log(json);
 		switch(json.action) {
-			case SocketEvent.USER_CONNECT:
-				store.dispatch("addUser", json.data)
+			case SocketEvent.JOIN_ROOM:
+				store.dispatch("userJoined", json.data)
+				break;
+			case SocketEvent.LEAVE_ROOM:
+				store.dispatch("userLeft", json.data)
 				break;
 		}
 		this.dispatchEvent(new SocketEvent(json.action, json.data));
@@ -119,8 +131,8 @@ export default class SockController extends EventDispatcher {
 }
 
 export enum SOCK_ACTIONS {
-	DISCONNECT="DISCONNECT",
-	LOGIN="LOGIN",
+	DEFINE_UID="DEFINE_UID",
 	PING="PING",
 	JOIN_ROOM="JOIN_ROOM",
+	LEAVE_ROOM="LEAVE_ROOM",
 };

@@ -2,8 +2,9 @@ import { Event } from '@/utils/EventDispatcher';
 
 export default class SocketEvent  extends Event {
 	
-	public static USER_CONNECT:string = "USER_CONNECT";
-	public static USER_DISCONNECT:string = "USER_DISCONNECT";
+	public static USER_MESSAGE:string = "USER_MESSAGE";
+	public static JOIN_ROOM="JOIN_ROOM";
+	public static LEAVE_ROOM="LEAVE_ROOM";
 	public static INFO:string = "INFO";
 
 	private _data:any;

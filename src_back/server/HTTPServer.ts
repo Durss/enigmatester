@@ -8,7 +8,7 @@ import * as bodyParser from "body-parser";
 import RoomData from "../vo/RoomData";
 import UserData from "../vo/UserData";
 import { v4 as uuidv4 } from 'uuid';
-import SocketServer, { SOCK_ACTIONS } from "./SocketServer";
+import SocketServer from "./SocketServer";
 
 export default class HTTPServer {
 
@@ -20,6 +20,10 @@ export default class HTTPServer {
 		this.app = <Express>express();
 		let server = http.createServer(<any>this.app);
 		
+		SocketServer.instance.onDeleteGroup = (groupId:string) => {
+			Logger.log("Group empty, delete it ", groupId)
+			delete this._rooms[groupId];
+		}
 		SocketServer.instance.installHandler(server, {prefix:"/sock"});
 		server.listen(Config.SOCKET_SERVER_PORT, '0.0.0.0');
 
@@ -89,13 +93,14 @@ export default class HTTPServer {
 				}
 				if(!found) valid = false;
 			}
-			res.status(200).send(JSON.stringify({success:true, valid}));
+			res.status(200).send(JSON.stringify({success:true, valid, room}));
 		});
 		
 		/**
 		 * JOIN/CREATE ROOM
 		 */
 		this.app.post("/api/room/join", (req, res) => {
+			let userId = req.body.uid;
 			let userName = req.body.name;
 			let roomName = req.body.room;
 			let user:UserData = {
@@ -113,15 +118,33 @@ export default class HTTPServer {
 					name:roomName,
 					users:[user]
 				}
+			}else if(userId) {
+				let found = false;
+				for (let i = 0; i < room.users.length; i++) {
+					if(room.users[i].id == userId) {
+						user = room.users[i];
+						found = true;
+					}
+				}
+				if(!found) {
+					res.status(301).send(JSON.stringify({success:false, code:"SESSION_NOT_FOUND", message:"Unable to restore session !"}));
+				}
 			}else if(room.users.length < 3) {
+				for (let i = 0; i < room.users.length; i++) {
+					if(room.users[i].name.toLowerCase().trim() == userName.toLowerCase().trim()) {
+						res.status(301).send(JSON.stringify({success:false, code:"USERNAME_USED", message:"User name "+userName+" is already used in this room"}));
+						return;
+					}
+				}
 				user.index = room.users.length;
 				room.users.push(user);
 			}else{
 				res.status(301).send(JSON.stringify({success:false, code:"ROOM_FULL", message:"Room is already full"}));
 				return;
 			}
+			SocketServer.instance.addToGroup(room.name, user);
 			res.status(200).send(JSON.stringify({success:true, room:this._rooms[roomName.toLowerCase()], me:user, created}));
-			SocketServer.instance.sendToUserList(room.users, {action:SOCK_ACTIONS.JOIN_ROOM});
+			// SocketServer.instance.sendToGroup(room.id, {action:SOCK_ACTIONS.JOIN_ROOM, data:user});
 		});
 
 		/**

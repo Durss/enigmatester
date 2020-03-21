@@ -7,6 +7,7 @@
 		<Reticle />
 		<Box3D :playerIndex="playerIndex" />
 		<FileSelector :playerIndex="playerIndex" />
+		<ChatView />
 	</div>
 </template>
 
@@ -17,12 +18,14 @@ import Box3D from '../components/Box3D.vue';
 import FileSelector from '../components/FileSelector.vue';
 import UserData from '../vo/UserData';
 import Reticle from '../components/Reticle.vue';
+import ChatView from '../components/ChatView.vue';
 
 @Component({
 	components:{
 		Box3D,
 		Reticle,
 		UserList,
+		ChatView,
 		FileSelector,
 	}
 })

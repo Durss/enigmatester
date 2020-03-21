@@ -21,8 +21,8 @@ router.beforeEach(async (to:Route, from:Route, next:Function) => {
 		store.dispatch("startApp", { route: to }).then(_ => {
 			if(!store.state.loggedin && to.matched[0].meta.needAuth === true) {
 				router.push({name:"home", params:{from:document.location.href}});
-			}else if(to.name == "home"){ 
-				router.push({name:"play"});
+			// }else if(to.name == "home"){ 
+			// 	router.push({name:"play"});
 			}else{
 				nextStep(next, to);
 			}

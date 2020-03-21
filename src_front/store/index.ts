@@ -47,7 +47,29 @@ export default new Vuex.Store({
 			state.room = payload.room;
 			localStorage.setItem("me", JSON.stringify(state.me));
 			localStorage.setItem("room", JSON.stringify(state.room));
+			SockController.instance.user = state.me;
 		},
+
+		userJoined(state, payload) {
+			console.log("User joined me ", payload.name)
+			let room = state.room;
+			for (let i = 0; i < room.users.length; i++) {
+				const u:UserData = room.users[i];
+				if(u.id == payload.id) return;
+			}
+			room.users.push(payload);
+		},
+
+		userLeft(state, payload) {
+			console.log("User left ", payload.name)
+			let room = state.room;
+			for (let i = 0; i < room.users.length; i++) {
+				const u:UserData = room.users[i];
+				if(u.id == payload.id) {
+					room.users.splice(i, 1);
+				}
+			}
+		}
 
 	},
 
@@ -67,16 +89,25 @@ export default new Vuex.Store({
 			//local network of the company or because s-he logged in.
 			SockController.instance.connect();
 			
-			let me:any = localStorage.getItem("me");
-			let room:any = localStorage.getItem("room");
-			if(me && room) {
-				me = JSON.parse(me);
-				room = JSON.parse(room);
-				let res = await Api.get("room/valid", {uid:(<UserData>me).id, name:(<RoomData>room).name});
-				if(res.valid) {
-					//Room exists and we're part of it, authenticate the user
-					this.commit("joinRoom", {me, room});
+			try {
+				let me:any = localStorage.getItem("me");
+				let room:any = localStorage.getItem("room");
+				if(me && room) {
+					me = JSON.parse(me);
+					room = JSON.parse(room);
+					let res = await Api.get("room/valid", {uid:(<UserData>me).id, name:(<RoomData>room).name});
+					if(res.valid) {
+						//Room exists and we're part of it, authenticate the user
+						await Api.post("room/join", {uid:me.id, room:res.room.name});
+						this.commit("joinRoom", {me, room:res.room});
+					}
 				}
+			}catch(error) {
+				//Data probably corrupted, clear it to avoid crash
+				state.loggedin = false;
+				state.me = null;
+				state.room = null;
+				localStorage.clear();
 			}
 
 			startPromise = new Promise(async (resolve, reject) => {
@@ -94,5 +125,9 @@ export default new Vuex.Store({
 		confirm({commit}, payload) { commit("confirm", payload); },
 
 		joinRoom({commit}, payload) { commit("joinRoom", payload); },
+
+		userJoined({commit}, payload) { commit("userJoined", payload); },
+
+		userLeft({commit}, payload) { commit("userLeft", payload); },
 	}
 })
