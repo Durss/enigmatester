@@ -2,17 +2,18 @@
 	<div class="reticle" :style="style">
 		<div ref="start" :style="styleStart" class="part">
 			<img src="@/assets/reticle/1.svg" draggable="false">
-			<div class="pivot" ref="pivot1"></div>
-			<div class="pivot pivot2" ref="pivot2"></div>
+			<div class="pivot pivot1" ref="pivotStart1"></div>
+			<div class="pivot pivot2" ref="pivotStart2"></div>
 		</div>
-		<div ref="middle" class="part">
+		<div ref="middle" :style="styleMiddle" class="part">
 			<img src="@/assets/reticle/2.svg" draggable="false">
+			<div class="pivot pivot1" ref="pivotMiddle1"></div>
+			<div class="pivot pivot2" ref="pivotMiddle2"></div>
 		</div>
 		<div ref="end" :style="styleEnd" class="part">
 			<img src="@/assets/reticle/3.svg" draggable="false">
-			<div class="pivot pivot3" ref="pivot3"></div>
+			<div class="pivot pivot1" ref="pivotEnd1"></div>
 		</div>
-		<div ref="mark" class="mark"></div>
 	</div>
 </template>
 
@@ -26,24 +27,36 @@ export default class Reticle extends Vue {
 
 	public get style():any {
 		return {
-			left: this.pos.x+"px",
-			top: this.pos.y+"px",
-			transform: "rotate("+this.angleAll+"rad)",
+			// left: this.posAll.x+"px",
+			// top: this.posAll.y+"px",
+			// transform: "rotate("+this.angleAll+"rad)",
 			// transformOrigin: this.pivotAll.x+"px "+this.pivotAll.y+"px",
 		}
 	}
 
 	public get styleStart():any {
 		return {
+			left: this.posAll.x+"px",
+			top: this.posAll.y+"px",
+			transform: "rotate("+this.angleAll+"rad)",
+			// transformOrigin: this.pivotAll.x+"px "+this.pivotAll.y+"px",
+		}
+	}
+
+	public get styleMiddle():any {
+		return {
+			left: this.posMiddle.x+"px",
+			top: this.posMiddle.y+"px",
 			transform: "rotate("+this.angleA+"rad)",
-			transformOrigin: this.pivotA.x+"px "+this.pivotA.y+"px",
 		}
 	}
 
 	public get styleEnd():any {
 		return {
+			left: this.posEnd.x+"px",
+			top: this.posEnd.y+"px",
 			transform: "rotate("+this.angleB+"rad)",
-			transformOrigin: this.pivotB.x+"px "+this.pivotB.y+"px",
+			// transformOrigin: this.pivotB.x+"px "+this.pivotB.y+"px",
 		}
 	}
 	
@@ -53,13 +66,16 @@ export default class Reticle extends Vue {
 	private rotateA:boolean = false;
 	private rotateB:boolean = false;
 	private rotateAll:boolean = false;
-	private pos:{x:number, y:number} = {x:900, y:600};
+	private posMiddle:{x:number, y:number} = {x:0, y:0};
+	private posEnd:{x:number, y:number} = {x:0, y:0};
+	private posAll:{x:number, y:number} = {x:400, y:400};
 	private dragOffset:{x:number, y:number} = {x:0, y:0};
-	private pivotA:{x:number, y:number} = {x:28.3, y:56.7};
-	private pivotB:{x:number, y:number} = {x:197.8, y:56.7};
-	private pivotAll:{x:number, y:number} = {x:0, y:0};
 	private angleA:number = 0;
+	private valueA:number = 0;
+	private angleAOffset:number = 0;
 	private angleB:number = 0;
+	private valueB:number = 0;
+	private angleBOffset:number = 0;
 	private angleAll:number = Math.PI*0;
 	
 	private _mouseDownHandler:any;
@@ -67,6 +83,8 @@ export default class Reticle extends Vue {
 	private _mouseMoveHandler:any;
 
 	public mounted():void {
+
+		this.placeItems();
 
 		this._mouseDownHandler = (e:MouseEvent) => this.onMouseDown(e);
 		this._mouseUpHandler = (e:MouseEvent) => this.onMouseUp(e);
@@ -88,24 +106,21 @@ export default class Reticle extends Vue {
 	 * Start dragging carousel
 	 */
 	private onMouseDown(event:MouseEvent):void {
-		let bounds = this.$el.getBoundingClientRect();
-		this.dragOffset.x = event.clientX - bounds.left;
-		this.dragOffset.y = event.clientY - bounds.top;
+		if(event.buttons == 2) {
+			this.rotateAll = true;
+		}else
 		if(event.target == this.$refs.middle) {
-			if(event.buttons == 2) {
-				this.rotateAll = true;
-			}else{
-				this.dragging = true;
-				let bounds = this.$el.getBoundingClientRect();
-				this.dragOffset.x = event.clientX;
-				this.dragOffset.y = event.clientY;
-			}
-		}
-		if(event.target == this.$refs.start) {
 			this.rotateA = true;
-		}
+			this.angleAOffset = this.getMouseAngleA(event.clientX, event.clientY);
+		}else 
+		if(event.target == this.$refs.start) {
+			this.dragging = true;
+			this.dragOffset.x = event.clientX;
+			this.dragOffset.y = event.clientY;
+		}else 
 		if(event.target == this.$refs.end) {
 			this.rotateB = true;
+			this.angleAOffset = this.getMouseAngleB(event.clientX, event.clientY);
 		}
 	}
 
@@ -120,59 +135,86 @@ export default class Reticle extends Vue {
 		event.preventDefault();
 	}
 
+	public getMouseAngleA(px, py):number {
+		let bounds = (<HTMLDivElement>this.$refs.pivotStart2).getBoundingClientRect();
+		let bounds2 = (<HTMLDivElement>this.$el).getBoundingClientRect();
+		return Math.atan2(bounds.top - py, bounds.left - px);
+	}
+
+	public getMouseAngleB(px, py):number {
+		let bounds = (<HTMLDivElement>this.$refs.pivotEnd1).getBoundingClientRect();
+		let bounds2 = (<HTMLDivElement>this.$el).getBoundingClientRect();
+		return Math.atan2(bounds.top - py, bounds.left - px);
+	}
+
 	/**
 	 * Dragging carousel
 	 */
-	private onMouseMove(event:MouseEvent):void {
+	private async onMouseMove(event:MouseEvent):Promise<void> {
 		let px:number = event.clientX;
 		let py:number = event.clientY;
-		
-		this.pivotAll.x = 0;
-		if(this.$refs.middle) {
-			let mark = <HTMLDivElement>this.$refs.mark;
-			let pivot = <HTMLDivElement>this.$refs.pivot2;
-			let bounds = pivot.getBoundingClientRect();
-			let boundsPivot = this.$el.getBoundingClientRect();
-			this.pivotAll.x = bounds.left - boundsPivot.left;
-			this.pivotAll.y = bounds.top - boundsPivot.top;
-			mark.style.left = this.pivotAll.x+"px";
-			mark.style.top = this.pivotAll.y+"px";
-		}
 		
 		if(this.dragging) {
 			let bounds = this.$el.getBoundingClientRect();
 			let px = event.clientX;
 			let py = event.clientY;
 			
-			this.pos.x += (px-this.dragOffset.x);
-			this.pos.y += (py-this.dragOffset.y);
+			this.posAll.x += (px-this.dragOffset.x);
+			this.posAll.y += (py-this.dragOffset.y);
 
 			this.dragOffset.x = px;
 			this.dragOffset.y = py;
 		}
-		
+
 		let angleStep = 2*Math.PI/16;
 		if(this.rotateA) {
-			let bounds = (<HTMLImageElement>this.$refs.pivot2).getBoundingClientRect();
-			let bounds2 = (<HTMLImageElement>this.$el).getBoundingClientRect();
-			let a = Math.atan2(py - bounds.top, px - bounds.left) + this.angleAll;
-			let a2 = Math.atan2(bounds2.top - bounds.top, bounds2.left - bounds.left);// + this.angleAll;
-			this.angleA = a - a2;//Math.min(Math.max(-Math.PI/2, a), Math.PI/2);
-			// this.angleA = Math.round(this.angleA/angleStep)*angleStep;
+			let before = this.angleA;
+			let a = this.getMouseAngleA(px, py);
+			this.angleA = Math.round(((a - this.angleAll))/angleStep)*angleStep + this.angleAll;
+			this.valueA = 10 - (Math.round((this.angleA-this.angleAll) * 180/Math.PI / 360 * 16) + 5);
+			if(this.valueA<0) this.valueA += 16;
+			if(this.valueA>9) this.valueA -= 16;
+			this.valueA = Math.min(Math.max(1, this.valueA), 9);
+			this.angleB -= before - this.angleA;
 		}
+		
 		if(this.rotateB) {
-			let bounds = (<HTMLImageElement>this.$refs.pivot3).getBoundingClientRect();
-			let bounds2 = (<HTMLImageElement>this.$el).getBoundingClientRect();
-			let a = Math.atan2(py - bounds.top, px - bounds.left) + this.angleAll;
-			let a2 = Math.atan2(bounds2.top - bounds.top, bounds2.left - bounds.left);// + this.angleAll;
-			this.angleB = a - a2;//Math.min(Math.max(-Math.PI/2, a), Math.PI/2);
-			// this.angleB = Math.round(this.angleB/angleStep)*angleStep;
+			let a = this.getMouseAngleB(px, py);
+			this.angleB = Math.round((a - this.angleAll)/angleStep)*angleStep + this.angleAll;
+			this.valueB = 10 - (Math.round((this.angleB - this.angleA) * 180/Math.PI / 360 * 16) + 5);
+			if(this.valueB<0) this.valueB += 16;
+			if(this.valueB>9) this.valueB -= 16;
+			this.valueB = Math.min(Math.max(1, this.valueB), 9);
 		}
+		console.log(this.valueA, this.valueB);
+
 		if(this.rotateAll) {
-			let bounds = (<HTMLImageElement>this.$el).getBoundingClientRect();
-			let a = Math.atan2((bounds.top + bounds.height/2) - py, (bounds.left + 30.4) - px);
-			// this.angleAll = Math.min(Math.max(-Math.PI/2, a), Math.PI/2);
+			let before = this.angleAll;
+			let bounds1 = (<HTMLDivElement>this.$refs.start).getBoundingClientRect();
+			let pivot = (<HTMLDivElement>this.$refs.pivotStart1).getBoundingClientRect();
+			let a = Math.atan2(pivot.top - py, pivot.left - px);
+			this.angleAll = a;
+			this.angleA -= before - a;
+			this.angleB -= before - a;
 		}
+
+		this.placeItems();
+	}
+
+	public async placeItems():Promise<void> {
+
+		await this.$nextTick();
+		let pivot1 = (<HTMLDivElement>this.$refs.pivotStart2).getBoundingClientRect();
+		let pivot2 = (<HTMLDivElement>this.$refs.pivotMiddle1).getBoundingClientRect();
+		this.posMiddle.x = pivot1.x - 126;
+		this.posMiddle.y = pivot1.y - 28;
+
+		await this.$nextTick();
+		let middle = (<HTMLDivElement>this.$refs.middle).getBoundingClientRect();
+		pivot1 = (<HTMLDivElement>this.$refs.pivotMiddle2).getBoundingClientRect();
+		pivot2 = (<HTMLDivElement>this.$refs.pivotEnd1).getBoundingClientRect();
+		this.posEnd.x = pivot1.x - 197.8;
+		this.posEnd.y = pivot1.y - 56.7;
 	}
 
 }
@@ -180,41 +222,31 @@ export default class Reticle extends Vue {
 
 <style scoped lang="less">
 .reticle{
-	.mark, .pivot {
-		position: absolute;
-		z-index: 1000;
-		background-color: red;
-		border-radius: 50%;
-		width: 7px;
-		height: 7px;
-		transform: translate(-50%, -50%);
-		&.pivot {
-			left: 195px;
-			top: 56.5px;
-			width: 5px;
-			height: 5px;
-			background-color: green;
-			&.pivot2 {
-				left: 28.3px;
-				top: 56.5px;
-			}
-			&.pivot3 {
-				left: 198px;
-				top: 56.5px;
-			}
-		}
-	}
 	position: absolute;
 	left: 0;
 	top: 0;
 	z-index: 2;
 	user-select: none;
+	background-color: white;
+	.pivot {
+		position: absolute;
+		z-index: 1000;
+		background-color: red;
+		border-radius: 50%;
+		width: 0px;
+		height: 0px;
+		transform: translate(-50%, -50%);
+		&.pivot1 {
+			background-color: green;
+		}
+	}
+
 	.part {
 		position: absolute;
 		left: 0;
 		top: 0;
-		transform: scale(1);
 		transition: filter .3s;
+		transform-origin: top left;
 		&>* {
 			pointer-events: none;
 		}
@@ -230,6 +262,15 @@ export default class Reticle extends Vue {
 			width: 223.3px;
 			height: 113.5px;
 			left: 265px;
+			transform-origin: 195px 56.5px;
+			.pivot1 {
+				left: 195px;
+				top: 56px;
+			}
+			.pivot2 {
+				left: 29px;
+				top: 56px;
+			}
 		}
 		&:nth-child(2) {
 			width: 157.3px;
@@ -237,10 +278,24 @@ export default class Reticle extends Vue {
 			left: 167px;
 			top: 28px;
 			z-index: 1;
+			transform-origin: 126.6px 28.3px;
+			.pivot1 {
+				left: 127px;
+				top: 29px;
+			}
+			.pivot2 {
+				left: 31px;
+				top: 29px;
+			}
 		}
 		&:nth-child(3) {
 			width: 226.2px;
 			height: 113.4px;
+			transform-origin: 198px 56.5px;
+			.pivot1 {
+				left: 197px;
+				top: 56px;
+			}
 		}
 	}
 }
