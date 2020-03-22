@@ -66,8 +66,7 @@ export default class FileSelector extends Vue {
 		}
 		
 		await this.$nextTick();
-
-		this.center.x = document.body.clientWidth * .5;
+		this.center.x = (<HTMLDivElement>this.$el).getBoundingClientRect().width * .5;
 		this.center.y = document.body.clientHeight + this.radius - this.offsetY;
 		
 		let step = (Math.PI*2)/this.keys.length;

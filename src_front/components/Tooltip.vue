@@ -1,7 +1,7 @@
 <template>
   <div class="tooltip">
 	  <div class="holder" :class="upsideDown? 'upsideDown' : ''" ref="holder" v-show="opened" key="tooltip">
-		  <div ref="content"></div>
+		  <div ref="content">{{currentContent}}</div>
 		  <div class="tip"></div>
 	  </div>
   </div>
@@ -17,9 +17,9 @@ import gsap from 'gsap';
 export default class Tooltip extends Vue {
 
     public upsideDown:boolean = false;
-    private opened:boolean = false;
+    public currentContent:string = "";
 	
-    private currentContent:string;
+    private opened:boolean = false;
     private mouseMoveHandler:any;
     private currentTarget:HTMLElement;
     private lastMouseEvent:MouseEvent;
@@ -51,7 +51,6 @@ export default class Tooltip extends Vue {
 		if(this.currentContent == content && this.opened) return;
 		this.opened = true;
 		this.currentContent = content;
-		(<HTMLElement>this.$refs.content).innerHTML = content;
 		gsap.killTweensOf(this.$el);
 		gsap.to(this.$el, {duration:.2, opacity:1});
 		
@@ -161,6 +160,7 @@ export default class Tooltip extends Vue {
 		max-width: 300px;
 		text-align: justify;
 		font-size: 16px;
+		z-index: 100;
 
 		.tip {
 			border-left: 10px solid transparent;
@@ -188,21 +188,5 @@ export default class Tooltip extends Vue {
 			}
 		}
 	}
-}
-</style>
-<style lang="less">
-@import (reference) '../less/_includes.less';
-.tooltip{
-	display: none;
-	// .holder {
-	// 	strong {
-	// 		color: @mainColor_warn;
-	// 		background-color: rgba(255, 255, 255, .5);
-	// 		text-shadow: 1px 1px 1px #fff;
-	// 		border-radius: 5px;
-	// 		padding: 0 5px;
-	// 		line-height: 20px;
-	// 	}
-	// }
 }
 </style>

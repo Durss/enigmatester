@@ -1,27 +1,26 @@
 <template>
 	<div class="formview">
-		<div class="dimmer" @click="$emit('close')"></div>
 		<div class="form">
 			<div class="menu" v-if="formIndex == -1">
-				<div class="title">Select the kind of info you want to share</div>
+				<div class="title">Choisis le type d'information à partager</div>
 				<button @click="formIndex = 0">
 					<img src="@/assets/icons/element_to_constellation.svg"> Constellation
 				</button>
-				<button @click="formIndex = 1">Constellation → Star Name</button>
+				<button @click="formIndex = 1">Constellation → Étoile</button>
 				<button @click="formIndex = 2">Constellation → A B</button>
 			</div>
 
 			<div v-if="formIndex != -1" class="content">
-				<Button :icon="require('@/assets/icons/back.svg')" @click="formIndex = -1" class="back" />
+				<Button :icon="require('@/assets/icons/cross_white.svg')" @click="formIndex = -1" class="back" />
 
 				<div v-if="formIndex==0">
-					Form 1
+					<ElemToConst />
 				</div>
 				<div v-if="formIndex==1">
-					Form 2
+					<ConstToStar />
 				</div>
 				<div v-if="formIndex==2">
-					Form 3
+					<ConstToAngles />
 				</div>
 			</div>
 		</div>
@@ -31,10 +30,16 @@
 <script lang="ts">
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
 import Button from './Button.vue';
+import ElemToConst from './forms/ElemToConst.vue';
+import ConstToStar from './forms/ConstToStar.vue';
+import ConstToAngles from './forms/ConstToAngles.vue';
 
 @Component({
 	components:{
-		Button
+		Button,
+		ElemToConst,
+		ConstToStar,
+		ConstToAngles,
 	}
 })
 export default class FormView extends Vue {
@@ -55,29 +60,15 @@ export default class FormView extends Vue {
 <style scoped lang="less">
 @import (reference) '../less/_includes.less';
 .formview{
-	position: absolute;
-	top: 0;
-	left: 0;
+	position: relative;
 	z-index: 100;
 	width: 100%;
-	height: 100%;
-	.dimmer {
-		position: absolute;
-		top: 0;
-		left: 0;
-		background-color: @mainColor_dark;
-		width: 100%;
-		height: 100%;
-		opacity: .5;
-	}
+	box-sizing: border-box;
 
 	.form {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		background-color: @mainColor_light;
-		padding: 30px;
+		background-color: @mainColor_light_light;
+		width: 100%;
+		padding: 10px;
 
 		.menu {
 			display: flex;
@@ -85,8 +76,8 @@ export default class FormView extends Vue {
 
 			.title {
 				font-weight: bold;
-				font-size: 25px;
-				margin-bottom: 20px;
+				font-size: 20px;
+				text-align: center;
 			}
 
 			button {
@@ -108,8 +99,14 @@ export default class FormView extends Vue {
 	.content {
 		.back {
 			position: absolute;
-			top: 20px;
-			left: 20px;
+			top: 0px;
+			left: 50%;
+			transform: translate(-50%, -100%);
+			width: 40px;
+			height: 40px;
+			border-radius: 0;
+			border-top-right-radius: 50%;
+			border-top-left-radius: 50%;
 		}
 	}
 }

@@ -1,24 +1,24 @@
 <template>
 	<div class="home">
 		<div class="header">
-			<h1>Connexion</h1>
-			<p class="infos">Set your name and choose a room name to join or create.</p>
+			<h1>Connection</h1>
+			<p class="infos">Entre ton pseudo et choisis un nom de salle à rejoindre ou créer.</p>
 		</div>
 
 		<form class="form" @submit.prevent="onSubmitForm()">
 
 			<div class="line">
 				<transition name="fade">
-					<label for="nameField" v-if="name.length > 0">Name</label>
+					<label for="nameField" v-if="name.length > 0">Pseudo</label>
 				</transition>
-				<input type="text" id="nameField" placeholder="name..." class="input dark" v-model="name" @keyup.esc="name=''" >
+				<input type="text" id="nameField" placeholder="name..." class="input dark" v-model="name" @keyup.esc="name=''" maxlength="20" >
 			</div>
 
 			<div class="line">
 				<transition name="fade">
-					<label for="roomField" v-if="room.length > 0">Room</label>
+					<label for="roomField" v-if="room.length > 0">Salle</label>
 				</transition>
-				<input type="text" id="roomField" placeholder="room..." class="input dark" v-model="room" @keyup.esc="room=''">
+				<input type="text" id="roomField" placeholder="room..." class="input dark" v-model="room" @keyup.esc="room=''" maxlength="20">
 			</div>
 
 			<Button title="Start" type="submit" class="submit" :disabled="!room || room.length < 3 || !name || name.length < 3" :loading="loading" />

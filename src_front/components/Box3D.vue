@@ -47,7 +47,7 @@ export default class Box3D extends Vue {
 		let width = this.$el.clientWidth;
 		let height = this.$el.clientHeight;
 		let specular = new THREE.Color(0x888888);
-		let element = ["fire", "water", "earth"][this.playerIndex];
+		let element = Config.ELEMENTS[this.playerIndex];
 		//Generate normal_maps via this tool :
 		// https://cpetry.github.io/NormalMap-Online/
 		// values :
@@ -336,7 +336,7 @@ export default class Box3D extends Vue {
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 100%;
+	// width: 100%;
 	height: 100%;
 	user-select: none;
 	cursor: grab;

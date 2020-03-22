@@ -37,7 +37,7 @@ export default class File extends Vue {
 	private _mouseWheelHandler:any;
 
 	public mounted():void {
-		this.center.x = this.pos.x = document.body.clientWidth * .5;
+		this.center.x = this.pos.x = (<HTMLDivElement>this.$el).getBoundingClientRect().width * .5;
 		this.center.y = this.pos.y = document.body.clientHeight * .5;
 
 		this._mouseDownHandler = (e:MouseEvent) => this.onMouseDown(e);

@@ -4,17 +4,26 @@
 			<h1 class="roomName">{{$store.state.room.name}}</h1>
 			<ul>
 				<li v-for="u in users" :key="u.id" class="user">
-					<div class="index">{{u.index+1}}</div>
+					<div class="index">
+						{{u.index+1}}
+						<!-- <img :src="require('@/assets/icons/elem_'+(ELEMENTS[u.index])+'.svg')" alt=""> -->
+					</div>
 					<div>{{u.name}}</div>
 				</li>
 			</ul>
 		</div>
-		<div class="history">
-			<ChatMessage :data="m" v-for="m in messages" :key="m.id" />
-			couille
+
+		<CurrentGoal class="goal" />
+		
+		<div class="messageList" ref="messageList">
+			<ChatMessage :data="m" v-for="m in messageList" :key="m.id" class="message" />
 		</div>
-		<div class="form">
-			<Button title="Send info" class="submit" @click="sendInfos()" />
+		
+		<FormView v-if="showForm" class="form" />
+
+		<div class="form" v-if="!showForm">
+			<Button title="Envoyer info" class="submit" @click="sendInfos()" />
+			<Button title="Envoyer message" class="submit" @click="sendInfos()" />
 		</div>
 	</div>
 </template>
@@ -26,18 +35,26 @@ import ChatMessage from './ChatMessage.vue';
 import SockController, { SOCK_ACTIONS } from '../controller/SockController';
 import SocketEvent from '../vo/SocketEvent';
 import UserData from '../vo/UserData';
+import Config from '../utils/Config';
+import FormView from './FormView.vue';
+import CurrentGoal from './CurrentGoal.vue';
 
 @Component({
 	components:{
 		Button,
+		FormView,
+		CurrentGoal,
 		ChatMessage
 	}
 })
 export default class ChatView extends Vue {
 
-	public messages:any[] = [];
+	public messageList:any[] = [];
 
 	private messageHandler:any;
+	private showForm:boolean = true;
+
+	public ELEMENTS:string[] = Config.ELEMENTS;
 
 	public get users():UserData[] {
 		let users:UserData[] = this.$store.state.room.users
@@ -55,15 +72,32 @@ export default class ChatView extends Vue {
 	}
 
 	public beforeDestroy():void {
-		
+		SockController.instance.removeEventListener(SOCK_ACTIONS.SEND_MESSAGE, this.messageHandler);
 	}
 
-	public onMessage(event:SocketEvent):void {
-		console.log("Socket event", event.data);
+	public async onMessage(event:SocketEvent):Promise<void> {
+		// console.log("Socket event", event.data);
+		if(event.getType() == SOCK_ACTIONS.SEND_MESSAGE) {
+			this.messageList.push(event.data);
+			if(this.messageList.length > 100) this.messageList.shift();
+		}
+
+		await this.$nextTick();
+			this.scrollToBottom()
+		setTimeout(_=> {
+			this.scrollToBottom()
+		},30)
+
+	}
+
+	private scrollToBottom():void {
+		let div = <HTMLDivElement>this.$refs.messageList;
+		div.scrollTop = div.scrollHeight;
 	}
 
 	public sendInfos():void {
 		this.$emit("sendinfo");
+		this.showForm = true;
 	}
 
 }
@@ -76,13 +110,14 @@ export default class ChatView extends Vue {
 	right: 0;
 	top: 0;
 	height: 100%;
-	width: 300px;
+	// width: 340px;
 	z-index: 1;
 	background: @mainColor_light;
 	display: flex;
 	flex-direction: column;
 
 	.users {
+		margin-bottom: 10px;
 		.roomName {
 			text-transform: capitalize;
 			padding: 10px;
@@ -97,7 +132,7 @@ export default class ChatView extends Vue {
 				padding: 5px 10px;
 				padding-left: 0px;
 				border-radius: 15px;
-				background-color: @mainColor_highlight;
+				background-color: @mainColor_warn;
 				display: flex;
 				margin-right: 0;
 				flex-direction: row;
@@ -118,25 +153,36 @@ export default class ChatView extends Vue {
 					align-items: center;
 					border-top-left-radius: 15px;
 					border-bottom-left-radius: 15px;
-					background-color: @mainColor_highlight_light;
+					background-color: @mainColor_warn_light;
+					&>img {
+						width: 20px;
+						height: 20px;
+						background-color: white;
+						border-radius: 500px;
+						padding: 2px;
+						overflow: hidden;
+					}
 				}
 			}
 		}
 	}
 
-	.history {
+	.messageList {
 		flex-grow: 1;
 		padding: 5px;
 		overflow-y: auto;
 		overflow-x: none;
-		// min-height: 100%;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.form {
-		padding: 5px;
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		border-top: 1px solid @mainColor_dark;
+		*> {
+			flex-grow: 1;
+		}
 	}
 }
 </style>

@@ -2,6 +2,7 @@
 	<div class="app">
 		<router-view/>
 		<Alert />
+		<Confirm />
 		<Tooltip />
 	</div>
 </template>

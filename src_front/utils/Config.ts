@@ -5,7 +5,7 @@
 export default class Config {
 
 	public static IS_PROD:boolean = /.*\.(com|fr|net|org|ninja)$/gi.test(window.location.hostname) || window.location.hostname.indexOf("192.168") > -1;
-	public static ENABLE_INTRO_ANIMATIONS:boolean = false;
+	public static ENABLE_INTRO_ANIMATIONS:boolean = true;
 	public static STORAGE_VERSION:number = 1;
 	
 	private static _ENV_NAME: EnvName;
@@ -38,6 +38,16 @@ export default class Config {
 			prod:"/api",
 		});
 	}
+
+	public static get CONSTELLATION_LIST():string[] {
+		return ["draco", "aquila", "cetus", "lepus", "orion", "gemini", "leo", "virgo", "bootes", "hercules", "lacerta", "ursa major", "crater", "phoenix", "lyra", "ursa minor", "cassiopeia", "cepheus", "cancer", "puppis", "pegasus", "pisces", "scorpius", "perseus"];
+	}
+
+	public static get STAR_NAME_LIST():string[] {
+		return ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "Ψ", "Χ", "ω", "v", "α&", "γα", "βα", "μα", "ια", "ζβ", "ξβ", "εβ", "δβ", "ζα", "Χβ", "Χα", "πα", "πβ", "πγ", "πδ", "πε", "πζ", "1", "2", "4", "5", "6", "9", "12", "16"];
+	}
+
+	public static get ELEMENTS():string [] { return ["fire", "water", "earth"]; }
 
 	
 

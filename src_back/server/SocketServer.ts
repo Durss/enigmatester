@@ -151,7 +151,7 @@ export default class SocketServer {
 
 		// Logger.info("Socket connexion opened : "+LogStyle.Reset+conn.id);
 		conn.on("data", (message) => {
-			let json:any = JSON.parse(message);
+			let json:{action:string, data:any, includeSelf?:boolean, from?:string} = JSON.parse(message);
 			if(json.action == SOCK_ACTIONS.PING) {
 				//Don't care, just sent to check if connection's style alive
 				return;
@@ -165,7 +165,10 @@ export default class SocketServer {
 				let uid = this._connectionToUid[ conn.id ];
 				let group = this._userIdToGroupId[ uid ];
 				if(uid && group) {
-					this.sendToGroup(group, json, uid);
+					let exclude = uid;
+					if(json.includeSelf === true) exclude = null;
+					json.from = uid;
+					this.sendToGroup(group, json, exclude);
 				}
 				// this.broadcast(json);
 			}

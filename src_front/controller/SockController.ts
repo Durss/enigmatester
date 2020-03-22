@@ -73,7 +73,7 @@ export default class SockController extends EventDispatcher {
 		this._timeout = <any>setTimeout(_=> this._sockjs.close(), 500);
 	}
 
-	public sendMessage(data:{action:string, data:any}):void {
+	public sendMessage(data:{action:string, data:any, includeSelf?:boolean}):void {
 		this._sockjs.send(JSON.stringify(data));
 	}
 

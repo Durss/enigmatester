@@ -20,6 +20,8 @@
 
 <script lang="ts">
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
+import Config from '../utils/Config';
+import gsap from 'gsap';
 
 @Component({
 	components:{}
@@ -90,6 +92,11 @@ export default class Reticle extends Vue {
 		this.$el.addEventListener("mousedown", this._mouseDownHandler);
 		document.addEventListener("mouseup", this._mouseUpHandler);
 		document.addEventListener("mousemove", this._mouseMoveHandler);
+
+		if(Config.ENABLE_INTRO_ANIMATIONS) {
+			gsap.from(this.$el, {duration:1, opacity:0, delay:5});
+			gsap.from(this, {duration:1, angleA:Math.PI, angleB:Math.PI*2, delay:5, onUpdate:_=> this.placeItems()});
+		}
 		
 	}
 
@@ -247,12 +254,17 @@ export default class Reticle extends Vue {
 		z-index: 3;
 		width: 20px;
 		height: 20px;
-		transform: translate(-50%, -50%);
-		padding: 20px;
+		padding: 10px;
 		cursor: pointer;
-		transition: transform .25s;
+		background-color: rgba(255, 255, 255, .5);
+		border-radius: 50%;
+		transform: translate(-50%, -50%);
+		transition: width .25s, height .25s, padding .25s;
 		&:hover {
-			transform: translate(-50%, -50%) scale(1.25);
+			width: 30px;
+			height: 30px;
+			// transform: translate(-50%, -50%) scale(1.25);
+			padding: 5px;
 		}
 	}
 
