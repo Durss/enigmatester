@@ -7,7 +7,8 @@
 		<Reticle />
 		<Box3D :playerIndex="playerIndex" />
 		<FileSelector :playerIndex="playerIndex" />
-		<ChatView />
+		<ChatView @sendinfo="showForm = true" />
+		<FormView v-if="showForm" @close="showForm = false" />
 	</div>
 </template>
 
@@ -19,6 +20,7 @@ import FileSelector from '../components/FileSelector.vue';
 import UserData from '../vo/UserData';
 import Reticle from '../components/Reticle.vue';
 import ChatView from '../components/ChatView.vue';
+import FormView from '../components/FormView.vue';
 
 @Component({
 	components:{
@@ -26,12 +28,14 @@ import ChatView from '../components/ChatView.vue';
 		Reticle,
 		UserList,
 		ChatView,
+		FormView,
 		FileSelector,
 	}
 })
 export default class Game extends Vue {
 
 	public playerIndex:number = 0;
+	public showForm:boolean = false;
 
 	public mounted():void {
 		this.playerIndex = (<UserData>this.$store.state.me).index;
@@ -45,6 +49,7 @@ export default class Game extends Vue {
 </script>
 
 <style scoped lang="less">
+@import (reference) '../less/_includes.less';
 .game{
 	.header {
 		position: absolute;

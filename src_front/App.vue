@@ -25,7 +25,7 @@ export default class App extends Vue {
 		(<HTMLElement>this.$el).addEventListener("wheel", (e:MouseWheelEvent)=> {
 			if(e.ctrlKey) e.preventDefault();
 		})
-		document.addEventListener("contextmenu", (e)=>e.preventDefault());
+		// document.addEventListener("contextmenu", (e)=>e.preventDefault());
 	}
 
 	public beforeDestroy():void {

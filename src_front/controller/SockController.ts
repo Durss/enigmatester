@@ -119,10 +119,10 @@ export default class SockController extends EventDispatcher {
 		// console.log("Sock message");
 		// console.log(json);
 		switch(json.action) {
-			case SocketEvent.JOIN_ROOM:
+			case SOCK_ACTIONS.JOIN_ROOM:
 				store.dispatch("userJoined", json.data)
 				break;
-			case SocketEvent.LEAVE_ROOM:
+			case SOCK_ACTIONS.LEAVE_ROOM:
 				store.dispatch("userLeft", json.data)
 				break;
 		}
@@ -131,8 +131,9 @@ export default class SockController extends EventDispatcher {
 }
 
 export enum SOCK_ACTIONS {
-	DEFINE_UID="DEFINE_UID",
 	PING="PING",
+	DEFINE_UID="DEFINE_UID",
 	JOIN_ROOM="JOIN_ROOM",
 	LEAVE_ROOM="LEAVE_ROOM",
+	SEND_MESSAGE="SEND_MESSAGE",
 };

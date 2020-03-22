@@ -26,6 +26,7 @@ export default class ChatMessage extends Vue {
 </script>
 
 <style scoped lang="less">
+@import (reference) '../less/_includes.less';
 .chatmessage{
 	
 }

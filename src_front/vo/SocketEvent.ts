@@ -1,15 +1,12 @@
 import { Event } from '@/utils/EventDispatcher';
+import { SOCK_ACTIONS } from '@/controller/SockController';
 
 export default class SocketEvent  extends Event {
 	
-	public static USER_MESSAGE:string = "USER_MESSAGE";
-	public static JOIN_ROOM="JOIN_ROOM";
-	public static LEAVE_ROOM="LEAVE_ROOM";
-	public static INFO:string = "INFO";
 
 	private _data:any;
 
-	constructor(type:string, data:any) {
+	constructor(type:SOCK_ACTIONS, data:any) {
 		super(type, null);
 		this._data = data;
 	}
