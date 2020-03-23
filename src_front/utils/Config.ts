@@ -49,6 +49,15 @@ export default class Config {
 
 	public static get ELEMENTS():string [] { return ["fire", "water", "earth"]; }
 
+	public static get STEPS():string [][] {
+		return [
+			["fire", "air"],
+			["earth", "water"],
+			["water", "air"],
+			["fire", "earth"],
+		];
+	}
+
 	
 
 	/**

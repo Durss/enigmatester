@@ -18,6 +18,7 @@ export default new Vuex.Store({
 		alert: null,
 		me:null,
 		room:null,
+		stepIndex:0,
 		confirm:{
 		  title:null,
 		  description:null,

@@ -37,13 +37,14 @@ export default class Persona extends Vue {
 		
 		`Chacun d'entre nous possède un élément. Vous possédez le ^feu¤, ^l'eau¤ et la ^terre¤. Je possède ^l'air¤.`,
 		
-		`Nous devons les lier entre eux puis les lier au 5ème élément à tout prix`,
+		`Nous devons les lier entre eux puis les lier tous au 5ème élément à tout prix`,
 		
 		`Commençons par les lier entre eux 2 à 2. Pour cela vous allez devoir utiliser un réticule articulé.`,
 		
 		`Placez ce réticule sur votre élément au bon endroit et en l'orientant correctement pour activer le pont de liaison.`,
 		
-		`Toutes les informations pour y parvenir ont été réparties entre vous trois, tâchez de bien collaborer.`,
+		`Toutes les informations pour y parvenir ont été réparties entre vous trois sur des documents.
+		A vous de trouver les informations utiles aux autres et à les leur partager.`,
 		
 		`Commençons par lier le feu et l'air.
 		Je m'occupe d'activer mon pont de liaison vers le feu, faites en sorte que le feu se lie à moi.`,
@@ -131,6 +132,7 @@ export default class Persona extends Vue {
 		left: 50%;
 		width: 400px;
 		transform: translate(-50%, -500px);
+		cursor: pointer;
 
 		.tip {
 			border-left: 10px solid transparent;

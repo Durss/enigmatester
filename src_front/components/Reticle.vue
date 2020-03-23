@@ -1,20 +1,20 @@
 <template>
 	<div class="reticle">
 		<div ref="start" :style="styleStart" class="part">
-			<img src="@/assets/reticle/1.svg" draggable="false">
+			<img src="@/assets/reticle/1.svg">
 			<div class="pivot pivot1" ref="pivotStart1"></div>
 			<div class="pivot pivot2" ref="pivotStart2"></div>
 		</div>
 		<div ref="middle" :style="styleMiddle" class="part">
-			<img src="@/assets/reticle/2.svg" draggable="false">
+			<img src="@/assets/reticle/2.svg">
 			<div class="pivot pivot1" ref="pivotMiddle1"></div>
 			<div class="pivot pivot2" ref="pivotMiddle2"></div>
 		</div>
 		<div ref="end" :style="styleEnd" class="part">
-			<img src="@/assets/reticle/3.svg" draggable="false">
+			<img src="@/assets/reticle/3.svg">
 			<div class="pivot pivot1" ref="pivotEnd1"></div>
 		</div>
-		<img src="@/assets/icons/move.svg" class="move" ref="move" :style="styleMove" draggable="false">
+		<img src="@/assets/icons/move.svg" class="move" ref="move" :style="styleMove">
 	</div>
 </template>
 
@@ -128,6 +128,7 @@ export default class Reticle extends Vue {
 			this.angleAOffset = this.getMouseAngleB(event.clientX, event.clientY);
 		}
 		this.onMouseMove(event);
+		event.preventDefault();
 	}
 
 	/**

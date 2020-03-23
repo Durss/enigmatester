@@ -1,10 +1,10 @@
 <template>
 	<div class="fileselector" v-if="files">
 		<div ref="carousel">
-			<img :src="files(key)" v-for="key in keys" :key="key" class="image" :ref="'sheet_'+key" @click="select(key)" draggable="false">
+			<img :src="files(key)" v-for="key in keys" :key="key" class="image" :ref="'sheet_'+key" @click="select(key)" />
 		</div>
 		<div ref="expanded">
-			<File :path="files(key)" v-for="key in selectedSheets" :key="key" class="imageSelected" @unselect="unselect(key)" draggable="false" />
+			<File :path="files(key)" v-for="key in selectedSheets" :key="key" class="imageSelected" @unselect="unselect(key)" />
 		</div>
 	</div>
 </template>
@@ -225,6 +225,7 @@ export default class FileSelector extends Vue {
 		this.dragOffset.x = this.dragStart.x = event.clientX - bounds.left;
 		this.dragOffset.y = this.dragStart.y = event.clientY - bounds.top;
 		this.dragging = true;
+		event.preventDefault();
 	}
 
 	/**

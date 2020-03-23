@@ -1,6 +1,6 @@
 <template>
 	<div class="file">
-		<img :src="path" class="image" draggable="false" :style="style">
+		<img :src="path" class="image" :style="style">
 	</div>
 </template>
 
@@ -78,6 +78,7 @@ export default class File extends Vue {
 		this.dragOffset.x = this.dragStart.x = event.clientX - bounds.left;
 		this.dragOffset.y = this.dragStart.y = event.clientY - bounds.top;
 		this.dragging = true;
+		event.preventDefault();
 	}
 
 	/**

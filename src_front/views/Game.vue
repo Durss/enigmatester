@@ -21,7 +21,6 @@
 		</div>
 
 		<div class="content" v-if="showGame">
-			<UserList />
 			<Reticle />
 			<Box3D :playerIndex="playerIndex" class="content" />
 			<FileSelector :playerIndex="playerIndex" class="content" />
@@ -32,7 +31,6 @@
 
 <script lang="ts">
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
-import UserList from '../components/UserList.vue';
 import Box3D from '../components/Box3D.vue';
 import FileSelector from '../components/FileSelector.vue';
 import UserData from '../vo/UserData';
@@ -47,7 +45,6 @@ import Persona from './Persona.vue';
 		Persona,
 		Box3D,
 		Reticle,
-		UserList,
 		ChatView,
 		FileSelector,
 	}

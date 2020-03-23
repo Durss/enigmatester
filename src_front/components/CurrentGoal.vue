@@ -9,14 +9,19 @@
 
 <script lang="ts">
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
+import Config from '../utils/Config';
 
 @Component({
 	components:{}
 })
 export default class CurrentGoal extends Vue {
 
-	public elem1:string = "fire";
-	public elem2:string = "water";
+	public get elem1():string{
+		return Config.STEPS[this.$store.state.stepIndex][0];
+	}
+	public get elem2():string{
+		return Config.STEPS[this.$store.state.stepIndex][1];
+	}
 
 	public mounted():void {
 		
