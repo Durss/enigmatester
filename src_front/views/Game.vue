@@ -20,7 +20,7 @@
 			<Persona @complete="showGame = true;" />
 		</div>
 
-		<div class="content" v-if="showGame">
+		<div class="content" v-if="ready && showGame">
 			<Reticle @updateCenterPos="setReticlePos" />
 			<Box3D :playerIndex="playerIndex" class="content" @updateCubeFace="updateCubeFace" />
 			<FileSelector :playerIndex="playerIndex" class="content" />
@@ -61,7 +61,7 @@ export default class Game extends Vue {
 	}
 
 	public get users():UserData[] {
-		let users:UserData[] = this.$store.state.room.users
+		let users:UserData[] = this.$store.state.room.users.concat();
 		users.sort((a,b)=> {
 			if(a.index < b.index) return -1;
 			if(a.index > b.index) return 1;
