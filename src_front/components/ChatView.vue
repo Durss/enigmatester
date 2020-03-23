@@ -3,7 +3,7 @@
 		<div class="users">
 			<h1 class="roomName">{{$store.state.room.name}}</h1>
 			<ul>
-				<li v-for="u in users" :key="u.id" class="user">
+				<li v-for="u in users" :key="u.id" class="user" :data-self="u.id == $store.state.me.id">
 					<div class="index">
 						{{u.index+1}}
 						<!-- <img :src="require('@/assets/icons/elem_'+(ELEMENTS[u.index])+'.svg')" alt=""> -->
@@ -131,8 +131,14 @@ export default class ChatView extends Vue {
 				flex-direction: row;
 				align-items: center;
 				text-transform: capitalize;
+				opacity: .8;
 				&:not(:last-child) {
 					margin-right: 5px;
+				}
+
+				&[data-self='true'] {
+					opacity: 1;
+					// border: 1px solid white;
 				}
 
 				.index {
