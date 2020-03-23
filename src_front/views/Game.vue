@@ -21,8 +21,8 @@
 		</div>
 
 		<div class="content" v-if="showGame">
-			<Reticle />
-			<Box3D :playerIndex="playerIndex" class="content" />
+			<Reticle @updateCenterPos="setReticlePos" />
+			<Box3D :playerIndex="playerIndex" class="content" @updateCubeFace="updateCubeFace" />
 			<FileSelector :playerIndex="playerIndex" class="content" />
 			<ChatView class="chat" />
 		</div>
@@ -76,6 +76,14 @@ export default class Game extends Vue {
 
 	public beforeDestroy():void {
 		
+	}
+
+	public setReticlePos(pos:DOMRect):void {
+		console.log("Reticle pos : ", pos.x, pos.y);
+	}
+
+	public updateCubeFace(faceIndex:number):void {
+		console.log("Cube Face "+faceIndex)
 	}
 
 }

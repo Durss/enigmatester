@@ -28,6 +28,7 @@ export default class Box3D extends Vue {
 	private dragOffset:{x:number, y:number} = {x:0, y:0};
 	private angleH:number = Math.PI;
 	private angleHInterp:number = this.angleH;
+	private currentFaceIndex:number = 0;
 
 	private _scene: THREE.Scene;
 	private _camera: THREE.PerspectiveCamera;
@@ -253,6 +254,12 @@ export default class Box3D extends Vue {
 			let a = this.angleH - this.angleHInterp;
 			a = (a) % Math.PI*2;
 			this.angleHInterp += a * .1;
+			let faceIndex = this.angleH;
+			faceIndex = faceIndex%(Math.PI*2);
+			faceIndex = Math.round(faceIndex/(Math.PI/2));
+			faceIndex = faceIndex%4;
+			if(faceIndex < 0) faceIndex = 4+faceIndex;
+			this.currentFaceIndex = Math.abs(faceIndex);
 		}
 		
 		
@@ -327,6 +334,10 @@ export default class Box3D extends Vue {
 		this.dragOffset.y = py;
 	}
 
+	@Watch("currentFaceIndex")
+	private onChangeFace():void {
+		this.$emit("updateCubeFace", this.currentFaceIndex);
+	}
 
 }
 </script>

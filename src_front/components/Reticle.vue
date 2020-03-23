@@ -237,6 +237,10 @@ export default class Reticle extends Vue {
 		let pivot = (<HTMLDivElement>this.$refs.pivotStart1).getBoundingClientRect();
 		this.posMove.x = pivot.x + Math.cos(this.angleAll) * 50;
 		this.posMove.y = pivot.y + Math.sin(this.angleAll) * 50;
+		
+		if(this.dragging) {
+			this.$emit("updateCenterPos", pivot);
+		}
 	}
 
 }
