@@ -53,7 +53,7 @@ export default class Persona extends Vue {
 	public mounted():void {
 		this.message = this.dialogues[0].replace(/\r|\n/gi, '<br />').replace(/\{pseudo\}/gi, this.$store.state.me.name);
 
-		this.nextHandler = (event:any) => this.onNext();
+		this.nextHandler = (event:any) => this.onNext(event);
 		(<HTMLDivElement>this.$refs.dialogue).addEventListener("mouseup", this.nextHandler);
 		document.addEventListener("keyup", this.nextHandler);
 		this.enterFrame();
@@ -65,7 +65,11 @@ export default class Persona extends Vue {
 		document.removeEventListener("keyup", this.nextHandler);
 	}
 
-	private onNext():void {
+	private onNext(e:any):void {
+		if(e.keyCode == 27) {
+			this.$emit("complete");
+			return;
+		}
 		if(this.charIndex < this.dialogues[this.dialIndex].length * .2) return;
 		this.dialIndex ++;
 		this.charIndex = 0;
