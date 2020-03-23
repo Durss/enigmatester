@@ -49,9 +49,6 @@ import CurrentGoal from './CurrentGoal.vue';
 })
 export default class ChatView extends Vue {
 
-	public messageList:any[] = [];
-
-	private messageHandler:any;
 	private showForm:boolean = true;
 
 	public ELEMENTS:string[] = Config.ELEMENTS;
@@ -66,22 +63,18 @@ export default class ChatView extends Vue {
 		return users;
 	}
 
+	public get messageList():any[] {
+		return this.$store.state.chatMessages;
+	}
+
 	public mounted():void {
-		this.messageHandler = (e:SocketEvent)=>this.onMessage(e);
-		SockController.instance.addEventListener(SOCK_ACTIONS.SEND_MESSAGE, this.messageHandler);
 	}
 
 	public beforeDestroy():void {
-		SockController.instance.removeEventListener(SOCK_ACTIONS.SEND_MESSAGE, this.messageHandler);
 	}
 
+	@Watch("$store.state.chatMessages")
 	public async onMessage(event:SocketEvent):Promise<void> {
-		// console.log("Socket event", event.data);
-		if(event.getType() == SOCK_ACTIONS.SEND_MESSAGE) {
-			this.messageList.push(event.data);
-			if(this.messageList.length > 100) this.messageList.shift();
-		}
-
 		await this.$nextTick();
 			this.scrollToBottom()
 		setTimeout(_=> {

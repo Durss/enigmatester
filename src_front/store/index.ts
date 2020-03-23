@@ -19,6 +19,7 @@ export default new Vuex.Store({
 		me:null,
 		room:null,
 		stepIndex:0,
+		chatMessages:[],
 		confirm:{
 		  title:null,
 		  description:null,
@@ -42,13 +43,25 @@ export default new Vuex.Store({
 
 		confirm(state, payload) { state.confirm = payload; },
 		
-		joinRoom(state, payload) {
+		async joinRoom(state, payload) {
 			state.loggedin = true;
 			state.me = payload.me;
 			state.room = payload.room;
-			localStorage.setItem("me", JSON.stringify(state.me));
-			localStorage.setItem("room", JSON.stringify(state.room));
+			//TODO enable this back
+			// localStorage.setItem("me", JSON.stringify(state.me));
+			// localStorage.setItem("room", JSON.stringify(state.room));
 			SockController.instance.user = state.me;
+			try {
+				let res = await Api.get("room/messages", {room:payload.room.name});
+				if(res.messages)
+				if(res.success) {
+					state.chatMessages = res.messages;
+				}else{
+					state.alert = "Unable to load chat messages<br />"+res.message;
+				}
+			}catch(error) {
+				state.alert = "Unable to load chat messages";
+			}
 		},
 
 		userJoined(state, payload) {
@@ -70,6 +83,11 @@ export default new Vuex.Store({
 					room.users.splice(i, 1);
 				}
 			}
+		},
+
+		onChatMessage(state, payload) {
+			state.chatMessages.push(payload);
+			if(state.chatMessages.length > 100) state.chatMessages.shift();
 		}
 
 	},
@@ -100,6 +118,7 @@ export default new Vuex.Store({
 					if(res.valid) {
 						//Room exists and we're part of it, authenticate the user
 						await Api.post("room/join", {uid:me.id, room:res.room.name});
+						await Api.post("room/messages", {room:res.room.name});
 						this.commit("joinRoom", {me, room:res.room});
 					}
 				}
@@ -130,5 +149,7 @@ export default new Vuex.Store({
 		userJoined({commit}, payload) { commit("userJoined", payload); },
 
 		userLeft({commit}, payload) { commit("userLeft", payload); },
+
+		onChatMessage({commit}, payload) { commit("onChatMessage", payload); },
 	}
 })

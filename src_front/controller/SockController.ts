@@ -125,6 +125,9 @@ export default class SockController extends EventDispatcher {
 			case SOCK_ACTIONS.LEAVE_ROOM:
 				store.dispatch("userLeft", json.data)
 				break;
+			case SOCK_ACTIONS.SEND_MESSAGE:
+				store.dispatch("onChatMessage", json.data)
+				break;
 		}
 		this.dispatchEvent(new SocketEvent(json.action, json.data));
 	}
