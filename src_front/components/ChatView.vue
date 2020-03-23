@@ -3,10 +3,9 @@
 		<div class="users">
 			<h1 class="roomName">{{$store.state.room.name}}</h1>
 			<ul>
-				<li v-for="u in users" :key="u.id" class="user" :data-self="u.id == $store.state.me.id">
+				<li v-for="u in users" :key="u.id" class="user" :data-self="u.id == $store.state.me.id" :data-ready="u.currentStepDone">
 					<div class="index">
-						{{u.index+1}}
-						<!-- <img :src="require('@/assets/icons/elem_'+(ELEMENTS[u.index])+'.svg')" alt=""> -->
+						<img :src="require('@/assets/icons/elem_'+(ELEMENTS[u.index])+'.svg')" alt="">
 					</div>
 					<div>{{u.name}}</div>
 				</li>
@@ -125,34 +124,52 @@ export default class ChatView extends Vue {
 				padding: 5px 10px;
 				padding-left: 0px;
 				border-radius: 15px;
-				background-color: @mainColor_warn;
+				background-color: @mainColor_highlight;
 				display: flex;
 				margin-right: 0;
 				flex-direction: row;
 				align-items: center;
 				text-transform: capitalize;
-				opacity: .8;
+				// color: darken(@mainColor_warn, 10%);
 				&:not(:last-child) {
 					margin-right: 5px;
 				}
 
 				&[data-self='true'] {
 					opacity: 1;
+					// color: @mainColor_normal;
+					// border: 1px solid white;
+				}
+
+				&[data-ready='true'] {
+					opacity: 1;
+					background-color: @mainColor_warn;
+					.index {
+						background-color: @mainColor_warn_light;
+					}
+					animation: blinker 1s linear infinite;
+					@keyframes blinker {
+					50% {
+						filter: brightness(120%) saturate(50%);
+						box-shadow: 0px 0px 10px 0px rgba(255,255,255,1);
+					}
+					}
 					// border: 1px solid white;
 				}
 
 				.index {
+					display: flex;
+					// display: none;
 					font-size: 12px;
 					font-weight: bold;
 					color: #fff;
 					margin-right: 10px;
 					height: calc(100% + 10px);
 					padding: 0 5px;
-					display: flex;
 					align-items: center;
 					border-top-left-radius: 15px;
 					border-bottom-left-radius: 15px;
-					background-color: @mainColor_warn_light;
+					background-color: @mainColor_highlight_light;
 					&>img {
 						width: 20px;
 						height: 20px;

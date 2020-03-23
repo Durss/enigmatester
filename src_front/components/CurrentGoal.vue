@@ -17,10 +17,10 @@ import Config from '../utils/Config';
 export default class CurrentGoal extends Vue {
 
 	public get elem1():string{
-		return Config.STEPS[this.$store.state.stepIndex].elements[0];
+		return Config.STEPS[this.$store.state.room.currentStepIndex].elements[0];
 	}
 	public get elem2():string{
-		return Config.STEPS[this.$store.state.stepIndex].elements[1];
+		return Config.STEPS[this.$store.state.room.currentStepIndex].elements[1];
 	}
 
 	public mounted():void {

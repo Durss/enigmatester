@@ -5,7 +5,7 @@
 			<div class="tip"></div>
 			<button v-if="pause" class="pause">suite &gt;</button>
 		</div>
-		<img src="@/assets/persona.png" alt="">
+		<img src="@/assets/persona.png" ref="perso" class="perso">
 		
 	</div>
 </template>
@@ -13,6 +13,8 @@
 <script lang="ts">
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
 import UserData from '../vo/UserData';
+import gsap from 'gsap';
+import RoomData from '../vo/RoomData';
 
 @Component({
 	components:{}
@@ -33,30 +35,65 @@ export default class Persona extends Vue {
 		`Bonjour {pseudo},
 		J'ai grand besoin de ton aide et de celle de tes ami.e.s.`,
 		
-		`L'équilibre des 4 éléments est en périle, nous devons le rétablir à tout prix.`,
+		`L'équilibre des 4 éléments est en péril, nous devons le rétablir à tout prix.`,
 		
 		`Chacun d'entre nous possède un élément. Vous possédez le ^feu¤, ^l'eau¤ et la ^terre¤. Je possède ^l'air¤.`,
 		
-		`Nous devons les lier entre eux puis les lier tous au 5ème élément à tout prix`,
+		`Nous devons les lier entre eux puis les lier tous au 5ème élément à tout prix.`,
 		
-		`Commençons par les lier entre eux 2 à 2. Pour cela vous allez devoir utiliser un réticule articulé.`,
+		`Commençons par les lier entre eux 2 à 2.
+		Pour cela vous allez devoir utiliser un réticule articulé.`,
 		
 		`Placez ce réticule sur votre élément au bon endroit et en l'orientant correctement pour activer le pont de liaison.`,
 		
-		`Toutes les informations pour y parvenir ont été réparties entre vous trois sur des documents.
+		`Le pont de liaison doit être activé sur les deux éléments pour qu'ils soient liés.`,
+		
+		`Toutes les informations pour y parvenir ont été réparties entre vous trois dans des documents.
 		A vous de trouver les informations utiles aux autres et à les leur partager.`,
 		
 		`Commençons par lier le feu et l'air.
 		Je m'occupe d'activer mon pont de liaison vers le feu, faites en sorte que le feu se lie à moi.`,
+		
+		null,
+		
+		`Excellent travail !
+		Vous avez compris comment procéder, maintenant passons à la seconde étape.
+		Liez la ^terre¤ et l'^eau¤`,
+		
+		null,
+		
+		`Très bien !
+		Lions maintenant l'^eau¤ à l'^air¤.
+		Je m'occupe de me lier à l'eau.`,
+		
+		null,
+		
+		`Parfait !
+		Dernière étape, il ne vous reste qu'à lier le ^feu¤ à la ^terre¤.`,
 	]
 
 	public mounted():void {
-		this.message = this.dialogues[0].replace(/\r|\n/gi, '<br />').replace(/\{pseudo\}/gi, this.$store.state.me.name);
+		
+		gsap.from(this.$refs.perso, {duration:2, opacity:0, ease:"sine.easein", onComplete:_=> {
+			let stepIndex = (<RoomData>this.$store.state.room).currentStepIndex;
+			if(stepIndex > 0) {
+				let nullCount = 0;
+				for (let i = 0; i < this.dialogues.length; i++) {
+					const d = this.dialogues[i];
+					if(d == null) nullCount ++;
+					if(nullCount == stepIndex) this.dialIndex = i;
+				}
+			}
+			this.charIndex = 0;
+			this.message = this.dialogues[this.dialIndex].replace(/\r|\n/gi, '<br />').replace(/\{pseudo\}/gi, this.$store.state.me.name);
+			gsap.from(this.$refs.dialogue, {opacity:0, duration:1});
+			this.enterFrame();
+		}})
 
 		this.nextHandler = (event:any) => this.onNext(event);
 		(<HTMLDivElement>this.$refs.dialogue).addEventListener("mouseup", this.nextHandler);
 		document.addEventListener("keyup", this.nextHandler);
-		this.enterFrame();
+		// this.enterFrame();
 	}
 
 	public beforeDestroy():void {
@@ -73,7 +110,7 @@ export default class Persona extends Vue {
 		if(this.charIndex < this.dialogues[this.dialIndex].length * .2) return;
 		this.dialIndex ++;
 		this.charIndex = 0;
-		if(this.dialIndex == this.dialogues.length) {
+		if(this.dialIndex == this.dialogues.length || this.dialogues[this.dialIndex] == null) {
 			this.$emit("complete");
 		}else{
 			this.pause = false;
@@ -89,12 +126,12 @@ export default class Persona extends Vue {
 		
 		this.charIndex +=1;
 		let mess = this.dialogues[this.dialIndex];
+		mess = mess.replace(/\{pseudo\}/gi, this.$store.state.me.name);
 		
 		if(this.charIndex > mess.length) {
 			this.pause = true;
 			return;
 		}
-		mess = mess.replace(/\{pseudo\}/gi, this.$store.state.me.name);
 
 		mess = mess.substring(0,this.charIndex);
 
@@ -121,10 +158,16 @@ export default class Persona extends Vue {
 <style scoped lang="less">
 @import (reference) '../less/_includes.less';
 .persona {
-	position: absolute;
-	bottom: 0;
-	left: 50%;
-	transform: translate(-50%, 0);
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+
+	.perso {
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translate(-50%, 0);
+	}
 
 	.dialogue {
 		position: absolute;
@@ -134,9 +177,14 @@ export default class Persona extends Vue {
 		border-radius: 20px;
 		bottom: 0;
 		left: 50%;
-		width: 400px;
+		max-width: 450px;
 		transform: translate(-50%, -500px);
 		cursor: pointer;
+
+		.message {
+			position: relative;
+			// max-width: 400px;
+		}
 
 		.tip {
 			border-left: 10px solid transparent;

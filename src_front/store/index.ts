@@ -18,7 +18,6 @@ export default new Vuex.Store({
 		alert: null,
 		me:null,
 		room:null,
-		stepIndex:0,
 		chatMessages:[],
 		confirm:{
 		  title:null,
@@ -88,6 +87,19 @@ export default new Vuex.Store({
 		onChatMessage(state, payload) {
 			state.chatMessages.push(payload);
 			if(state.chatMessages.length > 100) state.chatMessages.shift();
+		},
+
+		onUserReadyStateChange(state, payload) {
+			for (let i = 0; i < state.room.users.length; i++) {
+				const u:UserData = state.room.users[i];
+				if(u.id == payload.user) {
+					u.currentStepDone = payload.ready;
+				}
+			}
+		},
+
+		onNextStep(state, payload) {
+			(<RoomData>state.room).currentStepIndex ++;
 		}
 
 	},
@@ -151,5 +163,9 @@ export default new Vuex.Store({
 		userLeft({commit}, payload) { commit("userLeft", payload); },
 
 		onChatMessage({commit}, payload) { commit("onChatMessage", payload); },
+
+		onUserReadyStateChange({commit}, payload) { commit("onUserReadyStateChange", payload); },
+
+		onNextStep({commit}, payload) { commit("onNextStep", payload); },
 	}
 })

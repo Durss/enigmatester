@@ -8,7 +8,7 @@ import Config from '../utils/Config';
 import Logger from '../utils/Logger';
 import RoomData from "../vo/RoomData";
 import UserData from "../vo/UserData";
-import SocketServer from "./SocketServer";
+import SocketServer, { SOCK_ACTIONS } from "./SocketServer";
 
 export default class HTTPServer {
 
@@ -123,18 +123,6 @@ export default class HTTPServer {
 		});
 		
 		/**
-		 * GET MESSAGES OF A ROOM
-		 */
-		this.app.get("/api/room/messages", (req, res) => {
-			let room = this._rooms[(<string>req.query.room).toLowerCase()];
-			if(room) {
-				res.status(200).send(JSON.stringify({success:true, messages:room.messages}));
-			}else{
-				res.status(404).send(JSON.stringify({success:false, code:"ROOM_NOT_FOUND", message:"Room not found, unable to load its chat messages"}));
-			}
-		});
-		
-		/**
 		 * JOIN/CREATE ROOM
 		 */
 		this.app.post("/api/room/join", (req, res) => {
@@ -146,6 +134,7 @@ export default class HTTPServer {
 				id:uuidv4(),
 				name:userName,
 				index:0,
+				currentStepDone:false,
 			};
 			let room = this._rooms[roomName.toLowerCase()];
 			let created = false;
@@ -204,9 +193,63 @@ export default class HTTPServer {
 			res.status(200).send(JSON.stringify({success:true, room:this._rooms[roomName.toLowerCase()], me:user, created}));
 			// SocketServer.instance.sendToGroup(room.id, {action:SOCK_ACTIONS.JOIN_ROOM, data:user});
 		});
+		
+		/**
+		 * GET MESSAGES OF A ROOM
+		 */
+		this.app.get("/api/room/messages", (req, res) => {
+			let room = this._rooms[(<string>req.query.room).toLowerCase()];
+			if(room) {
+				res.status(200).send(JSON.stringify({success:true, messages:room.messages}));
+			}else{
+				res.status(404).send(JSON.stringify({success:false, code:"ROOM_NOT_FOUND", message:"Room not found, unable to load its chat messages"}));
+			}
+		});
+		
+		/**
+		 * SET A USER'S STEP STATE
+		 */
+		this.app.post("/api/user/ready", (req, res) => {
+			let state = req.body.state;
+			let userId = req.body.uid;
+			let roomName = req.body.room;
+			let room = this._rooms[roomName];
+			
+			// ["fire", "water", "earth", "air"];
+			let stepToUserStates = [
+				[true, false, false],
+				[false, true, true],
+				[false, true, false],
+				[true, false, true],
+			]
+			if(!room) {
+				res.status(404).send(JSON.stringify({success:false, code:"ROOM_NOT_FOUND", message:"Room not found"}));
+				return;
+			}
+			let allGood = true;
+			for (let i = 0; i < room.users.length; i++) {
+				const u = room.users[i];
+				if(u.id == userId) {
+					u.currentStepDone = Boolean(state);
+				}
+				if(u.currentStepDone !== stepToUserStates[room.currentStepIndex][i]) {
+					allGood = false;
+				}
+			}
+			res.status(200).send(JSON.stringify({success:true, room}));
+			if(allGood) {
+				//Broadcast to group that current step is complete
+				room.currentStepIndex ++;
+				SocketServer.instance.sendToGroup(room.name, {action:SOCK_ACTIONS.NEXT_STEP});
+				//Reset players step states
+				for (let i = 0; i < room.users.length; i++) {
+					room.users[i].currentStepDone = false;
+				}
+			}
+		})
 
 		/**
-		 * SERVE PUBLIC
+		 * SERVE PUBLIC FILES
 		 */
 		let publicFolder = Config.PUBLIC_PATH;
 		this.app.use(Config.SERVER_NAME+"/", express.static(publicFolder));//static files

@@ -39,6 +39,9 @@ import ChatView from '../components/ChatView.vue';
 import FormView from '../components/FormView.vue';
 import Config from '../utils/Config';
 import Persona from './Persona.vue';
+import SockController, { SOCK_ACTIONS } from '../controller/SockController';
+import Api from '../utils/Api';
+import SocketEvent from '../vo/SocketEvent';
 
 @Component({
 	components:{
@@ -51,8 +54,13 @@ import Persona from './Persona.vue';
 })
 export default class Game extends Vue {
 
+	public playerReady:boolean = false;
 	public playerIndex:number = 0;
 	public showGame:boolean = false;
+	public reticleTarget:{x:number, y:number} = null;
+	public faceIndex:number = 0;
+	public readyStateDelay:number = 0;
+	public nextStepHandler:any;
 
 	public ELEMENTS:string[] = Config.ELEMENTS;
 
@@ -72,18 +80,77 @@ export default class Game extends Vue {
 
 	public mounted():void {
 		this.playerIndex = (<UserData>this.$store.state.me).index;
+		this.nextStepHandler = (e:SocketEvent) => this.onNextStep(e);
+		// SockController.instance.addEventListener(SOCK_ACTIONS.NEXT_STEP, this.nextStepHandler);
 	}
 
 	public beforeDestroy():void {
-		
+		// SockController.instance.removeEventListener(SOCK_ACTIONS.NEXT_STEP, this.nextStepHandler);
 	}
 
 	public setReticlePos(pos:DOMRect):void {
-		console.log("Reticle pos : ", pos.x, pos.y);
+		// console.log("Reticle pos : ", pos.x, pos.y);
+		this.reticleTarget = pos;
+		this.checkComplete();
 	}
 
 	public updateCubeFace(faceIndex:number):void {
-		console.log("Cube Face "+faceIndex)
+		// console.log("Cube Face "+faceIndex)
+		this.faceIndex = faceIndex;
+		this.checkComplete();
+	}
+
+	private checkComplete():void {
+		if(!this.reticleTarget) return;
+		let step = Config.STEPS[this.$store.state.room.currentStepIndex];
+		for (let i = 0; i < step.elements.length; i++) {
+			const element = step.elements[i];
+			if(step.elements[i] == Config.ELEMENTS[this.playerIndex]) {
+				// console.log("My goal is index ", i)
+				// console.log(step.angles[i]);
+				// console.log(step.targets[i]);
+				// console.log(step.faceIndex[i]);
+				let retiCleDist = Math.sqrt(Math.pow(this.reticleTarget.x - step.targets[i].x,2) + Math.pow(this.reticleTarget.y - step.targets[i].y,2))
+				let isReady = false;
+				if(retiCleDist < 15 && this.faceIndex == step.faceIndex[i]) {
+					//Reticle targeting appropriate place and cube properly oriented
+					isReady = true;
+				}
+				this.sendReadyState(isReady)
+			}
+		}
+	}
+
+	private async sendReadyState(isReady:boolean, force:boolean = false):Promise<void> {
+		clearTimeout(this.readyStateDelay);
+		if(isReady && !force) {
+			//Wait a second before sending a ready state so it's not too easy to find the right
+			//reticle's spot by just dragging it over the box
+			this.readyStateDelay = setTimeout(_=> this.sendReadyState(isReady, true), 1000);
+			return;
+		}
+		
+		if(this.playerReady == isReady) return;//State didn't change, ignore it
+
+		this.playerReady = isReady;
+
+		try {
+			let res = await Api.post("user/ready", {state:isReady, uid:this.$store.state.me.id, room:this.$store.state.room.name});
+			if(res.success) {
+				//all good
+				SockController.instance.sendMessage({action:SOCK_ACTIONS.USER_READY, includeSelf:true, data:{user:this.$store.state.me.id, ready:isReady}});
+			}else{
+				this.$store.state.alert = "Unable to update your current state :(<br />"+res.message;
+			}
+		}catch(error) {
+			this.$store.state.alert = "Unable to update your current state :(";
+		}
+	}
+	
+	@Watch("$store.state.room.currentStepIndex")
+	public onNextStep(e:SocketEvent):void {
+		console.log("STEP CHANGE")
+		this.showGame = false;
 	}
 
 }

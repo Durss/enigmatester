@@ -13,6 +13,7 @@
 		<div ref="end" :style="styleEnd" class="part">
 			<img src="@/assets/reticle/3.svg">
 			<div class="pivot pivot1" ref="pivotEnd1"></div>
+			<div class="pivot pivot2" ref="pivotEnd2"></div>
 		</div>
 		<img src="@/assets/icons/move.svg" class="move" ref="move" :style="styleMove">
 	</div>
@@ -158,6 +159,8 @@ export default class Reticle extends Vue {
 	 * Dragging carousel
 	 */
 	private async onMouseMove(event:MouseEvent):Promise<void> {
+		if(!this.dragging && !this.rotateA && !this.rotateB && !this.rotateAll) return;
+		
 		let px:number = event.clientX;
 		let py:number = event.clientY;
 		
@@ -238,9 +241,8 @@ export default class Reticle extends Vue {
 		this.posMove.x = pivot.x + Math.cos(this.angleAll) * 50;
 		this.posMove.y = pivot.y + Math.sin(this.angleAll) * 50;
 		
-		if(this.dragging) {
-			this.$emit("updateCenterPos", pivot);
-		}
+		let target = (<HTMLDivElement>this.$refs.pivotEnd2).getBoundingClientRect();
+		this.$emit("updateCenterPos", target);
 	}
 
 }
@@ -340,6 +342,10 @@ export default class Reticle extends Vue {
 			transform-origin: 198px 56.5px;
 			.pivot1 {
 				left: 197px;
+				top: 56px;
+			}
+			.pivot2 {
+				left: 56px;
 				top: 56px;
 			}
 		}

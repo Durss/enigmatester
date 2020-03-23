@@ -128,6 +128,12 @@ export default class SockController extends EventDispatcher {
 			case SOCK_ACTIONS.SEND_MESSAGE:
 				store.dispatch("onChatMessage", json.data)
 				break;
+			case SOCK_ACTIONS.USER_READY:
+				store.dispatch("onUserReadyStateChange", json.data);
+				break;
+			case SOCK_ACTIONS.NEXT_STEP:
+				store.dispatch("onNextStep", json.data);
+				break;
 		}
 		this.dispatchEvent(new SocketEvent(json.action, json.data));
 	}
@@ -139,4 +145,6 @@ export enum SOCK_ACTIONS {
 	JOIN_ROOM="JOIN_ROOM",
 	LEAVE_ROOM="LEAVE_ROOM",
 	SEND_MESSAGE="SEND_MESSAGE",
+	USER_READY="USER_READY",
+	NEXT_STEP="NEXT_STEP",
 };

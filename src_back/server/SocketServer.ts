@@ -158,6 +158,7 @@ export default class SocketServer {
 				//Don't care, just sent to check if connection's style alive
 				return;
 			}else if(json.action == SOCK_ACTIONS.DEFINE_UID) {
+				//Associate socket connection to user
 				this._uidToConnection[json.data.id] = conn;
 				this._connectionToUid[conn.id] = json.data.id;
 				return;
@@ -166,6 +167,7 @@ export default class SocketServer {
 				let uid = this._connectionToUid[ conn.id ];
 				let group = this._userIdToGroupId[ uid ];
 				if(uid && group) {
+					//Message is sent by a valid user on a valid room.
 					Logger.info("Socket message : "+LogStyle.Reset+json.action);
 					Logger.simpleLog("uid:"+uid+"    group:"+group);
 					let exclude = uid;
@@ -173,15 +175,18 @@ export default class SocketServer {
 					json.from = uid;
 					this.sendToGroup(group, json, exclude);
 				}
+
+				//User left room, cleanup its references
 				if(json.action == SOCK_ACTIONS.LEAVE_ROOM) {
 					Logger.simpleLog("Force socket close");
 					this.onClose(conn);
 					this.removeUserFromGroup(uid);
 				}
+
+				//Someone sent a message, log it to history
 				if(json.action == SOCK_ACTIONS.SEND_MESSAGE) {
 					if(this.onMessage) this.onMessage(group, json.data);
 				}
-				// this.broadcast(json);
 			}
 		});
 		conn.on("close", (p) => {
@@ -231,4 +236,6 @@ export enum SOCK_ACTIONS {
 	JOIN_ROOM="JOIN_ROOM",
 	LEAVE_ROOM="LEAVE_ROOM",
 	SEND_MESSAGE="SEND_MESSAGE",
+	USER_READY="USER_READY",
+	NEXT_STEP="NEXT_STEP",
 };

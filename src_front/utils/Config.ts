@@ -47,29 +47,33 @@ export default class Config {
 		return ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "Ψ", "Χ", "ω", "v", "α&", "γα", "βα", "μα", "ια", "ζβ", "ξβ", "εβ", "δβ", "ζα", "Χβ", "Χα", "πα", "πβ", "πγ", "πδ", "πε", "πζ", "1", "2", "4", "5", "6", "9", "12", "16"];
 	}
 
-	public static get ELEMENTS():string [] { return ["fire", "water", "earth"]; }
+	public static get ELEMENTS():string [] { return ["fire", "water", "earth", "air"]; }
 
-	public static get STEPS():{elements:string[], angles:number[], faceIndex:number} [] {
+	public static get STEPS():{elements:string[], angles:number[][], faceIndex:number[], targets:{x:number, y:number}[]} [] {
 		return [
 			{
 				elements:["fire", "air"],
-				angles:[1,2],
-				faceIndex:0,
+				angles:[[2,1], null],
+				faceIndex:[0, null],
+				targets:[{x: 496, y:484}, null],
 			},
 			{
 				elements:["earth", "water"],
-				angles:[1,2],
-				faceIndex:0,
+				angles:[[9,8],[2,2]],
+				faceIndex:[0,2],
+				targets:[{x:497, y:483},{x:580, y:402}],
 			},
 			{
 				elements:["water", "air"],
-				angles:[1,2],
-				faceIndex:0,
+				angles:[[7,9],null],
+				faceIndex:[0,null],
+				targets:[{x:313, y:341},null],
 			},
 			{
 				elements:["fire", "earth"],
-				angles:[1,2],
-				faceIndex:0,
+				angles:[[8,4],[1,2]],
+				faceIndex:[3,2],
+				targets:[{x:354, y:440},{x:574, y:397}],
 			}
 		];
 	}
