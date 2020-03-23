@@ -5,7 +5,7 @@
 export default class Config {
 
 	public static IS_PROD:boolean = /.*\.(com|fr|net|org|ninja)$/gi.test(window.location.hostname) || window.location.hostname.indexOf("192.168") > -1;
-	public static ENABLE_INTRO_ANIMATIONS:boolean = true;
+	public static ENABLE_INTRO_ANIMATIONS:boolean = false || Config.IS_PROD;
 	public static STORAGE_VERSION:number = 1;
 	
 	private static _ENV_NAME: EnvName;
@@ -49,12 +49,28 @@ export default class Config {
 
 	public static get ELEMENTS():string [] { return ["fire", "water", "earth"]; }
 
-	public static get STEPS():string [][] {
+	public static get STEPS():{elements:string[], angles:number[], faceIndex:number} [] {
 		return [
-			["fire", "air"],
-			["earth", "water"],
-			["water", "air"],
-			["fire", "earth"],
+			{
+				elements:["fire", "air"],
+				angles:[1,2],
+				faceIndex:0,
+			},
+			{
+				elements:["earth", "water"],
+				angles:[1,2],
+				faceIndex:0,
+			},
+			{
+				elements:["water", "air"],
+				angles:[1,2],
+				faceIndex:0,
+			},
+			{
+				elements:["fire", "earth"],
+				angles:[1,2],
+				faceIndex:0,
+			}
 		];
 	}
 
