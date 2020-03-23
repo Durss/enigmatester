@@ -10,6 +10,7 @@ import Config from "../utils/Config";
 export default class SocketServer {
 
 	public onDeleteUser:Function;
+	public onMessage:Function;
 
 	private static _instance: SocketServer;
 	private _DISABLED: boolean = false;
@@ -78,7 +79,7 @@ export default class SocketServer {
 	 */
 	public sendTo(user:UserData, msg:{action:string, data?:any}):void {
 		let conn = this._uidToConnection[user.id.toString()];
-		console.log("send to ", user.name);
+		// console.log("send to ", user.name);
 		if(!conn) return;
 		conn.write(JSON.stringify(msg));
 	}
@@ -165,51 +166,62 @@ export default class SocketServer {
 				let uid = this._connectionToUid[ conn.id ];
 				let group = this._userIdToGroupId[ uid ];
 				if(uid && group) {
+					Logger.simpleLog("uid:"+uid+"    group:"+group);
 					let exclude = uid;
 					if(json.includeSelf === true) exclude = null;
 					json.from = uid;
 					this.sendToGroup(group, json, exclude);
-					if(json.action == SOCK_ACTIONS.LEAVE_ROOM) {
-						this.onClose(conn);
-					}
+				}
+				if(json.action == SOCK_ACTIONS.LEAVE_ROOM) {
+					Logger.simpleLog("Force socket close");
+					this.onClose(conn);
+					this.removeUserFromGroup(uid);
+				}
+				if(json.action == SOCK_ACTIONS.SEND_MESSAGE) {
+					if(this.onMessage) this.onMessage(group, json.data);
 				}
 				// this.broadcast(json);
 			}
 		});
-		conn.on("close", () => {
+		conn.on("close", (p) => {
 			this.onClose(conn);
+			let uid = this._connectionToUid[ conn.id ];
+			if(uid) {
+				this.removeUserFromGroup(uid);
+			}
 		});
 	}
 
 	private onClose(conn:Connection):void {
-		conn.close();
 		if(this._DISABLED) return;
-		Logger.info("Socket connexion closed : "+LogStyle.Reset+conn.id);
+		conn.close();
+		// Logger.info("Socket connexion closed : "+LogStyle.Reset+conn.id);
 		//Cleanup user's connection from memory
 		let idx = this._connections.indexOf(conn);
 		if(idx) {
+			delete this._connectionToUid[conn.id];
 			this._connections.splice(idx, 1);
-			let uid = this._connectionToUid[ conn.id ];
-			if(uid) {
-				delete this._uidToConnection[uid];
-				delete this._connectionToUid[conn.id];
-				let groupId = this._userIdToGroupId[uid];
-				let users = this._groupIdToUsers[groupId];
-				if(users) {
-					let user:UserData;
-					for (let i = 0; i < users.length; i++) {
-						if(users[i].id == uid) {
-							user = users[i]
-							users.splice(i, 1);
-							this.onDeleteUser(groupId, user);
-						}
-					}
-					if(user) {
-						this.sendToGroup(this._userIdToGroupId[uid], {action:SOCK_ACTIONS.LEAVE_ROOM, data:user}, user.id);
-					}
+		}
+	}
+
+	private removeUserFromGroup(uid:string):void {
+		delete this._uidToConnection[uid];
+		let groupId = this._userIdToGroupId[uid];
+		let users = this._groupIdToUsers[groupId];
+		if(users) {
+			let user:UserData;
+			for (let i = 0; i < users.length; i++) {
+				if(users[i].id == uid) {
+					user = users[i]
+					users.splice(i, 1);
+					this.onDeleteUser(groupId, user);
 				}
 			}
+			if(user) {
+				this.sendToGroup(this._userIdToGroupId[uid], {action:SOCK_ACTIONS.LEAVE_ROOM, data:user}, user.id);
+			}
 		}
+	}
 	}
 }
 

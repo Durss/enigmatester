@@ -2,6 +2,7 @@ import * as express from "express";
 import { NextFunction, Request, Response, Express } from "express-serve-static-core";
 import * as http from "http";
 import Config from '../utils/Config';
+import Utils from '../utils/Utils';
 import Logger from '../utils/Logger';
 import * as historyApiFallback from 'connect-history-api-fallback';
 import * as bodyParser from "body-parser";
@@ -15,20 +16,36 @@ export default class HTTPServer {
 	private app:Express;
 
 	private _rooms:{[id:string]:RoomData} = {};
+	private _messageHistory:{[id:string]:any[]} = {};
 
 	constructor(public port:number) {
 		this.app = <Express>express();
 		let server = http.createServer(<any>this.app);
 		
+		SocketServer.instance.onMessage = (roomId:string, message:any) => {
+			let messages = this._messageHistory[roomId];
+			if(!messages) this._messageHistory[roomId] = messages = [];
+			messages.push(message);
+			if(messages.length > 100) {
+				messages.shift();
+			}
+		}
+
 		SocketServer.instance.onDeleteUser = (roomId:string, user:UserData) => {
 			Logger.log("Remove user", user.name, "from room", roomId)
+			if(!this._rooms[roomId]) {
+				Logger.error("Room not found")
+				return;
+			}
 			for (let i = 0; i < this._rooms[roomId].users.length; i++) {
 				if(this._rooms[roomId].users[i].id == user.id) {
 					this._rooms[roomId].users.splice(i, 1);
 				}
 				if(this._rooms[roomId].users.length == 0) {
-					Logger.log("Group empty, delete it ", roomId)
+					Logger.log("Room empty, delete it ", roomId)
 					delete this._rooms[roomId];
+					delete this._messageHistory[roomId];
+					break;
 				}
 			}
 		}
@@ -105,14 +122,28 @@ export default class HTTPServer {
 		});
 		
 		/**
+		 * GET MESSAGES OF A ROOM
+		 */
+		this.app.get("/api/room/messages", (req, res) => {
+			let room = this._rooms[(<string>req.query.room).toLowerCase()];
+			if(room) {
+				let messages = this._messageHistory[room.name];
+				res.status(200).send(JSON.stringify({success:true, messages, room}));
+			}else{
+				res.status(404).send(JSON.stringify({success:false, code:"ROOM_NOT_FOUND", message:"Room not found, unable to load its chat messages"}));
+			}
+		});
+		
+		/**
 		 * JOIN/CREATE ROOM
 		 */
 		this.app.post("/api/room/join", (req, res) => {
 			let userId = req.body.uid;
 			let userName = req.body.name;
 			let roomName = req.body.room;
+			
 			let user:UserData = {
-				id:uuidv4(),
+				id:Utils.slugify(userName)+"_"+Utils.slugify(roomName),//uuidv4() //removed random uuid in favor to fix ID so we can retrieve chatMessages properly even after full logout/login
 				name:userName,
 				index:0,
 			};
