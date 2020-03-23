@@ -1,14 +1,13 @@
-import * as express from "express";
-import { NextFunction, Request, Response, Express } from "express-serve-static-core";
-import * as http from "http";
-import Config from '../utils/Config';
-import Utils from '../utils/Utils';
-import Logger from '../utils/Logger';
-import * as historyApiFallback from 'connect-history-api-fallback';
 import * as bodyParser from "body-parser";
+import * as historyApiFallback from 'connect-history-api-fallback';
+import * as express from "express";
+import { Express, NextFunction, Request, Response } from "express-serve-static-core";
+import * as http from "http";
+import { v4 as uuidv4 } from 'uuid';
+import Config from '../utils/Config';
+import Logger from '../utils/Logger';
 import RoomData from "../vo/RoomData";
 import UserData from "../vo/UserData";
-import { v4 as uuidv4 } from 'uuid';
 import SocketServer from "./SocketServer";
 
 export default class HTTPServer {
@@ -16,18 +15,17 @@ export default class HTTPServer {
 	private app:Express;
 
 	private _rooms:{[id:string]:RoomData} = {};
-	private _messageHistory:{[id:string]:any[]} = {};
 
 	constructor(public port:number) {
 		this.app = <Express>express();
 		let server = http.createServer(<any>this.app);
 		
 		SocketServer.instance.onMessage = (roomId:string, message:any) => {
-			let messages = this._messageHistory[roomId];
-			if(!messages) this._messageHistory[roomId] = messages = [];
-			messages.push(message);
-			if(messages.length > 100) {
-				messages.shift();
+			let room = this._rooms[roomId];
+			if(!room.messages) room.messages = [];
+			room.messages.push(message);
+			if(room.messages.length > 100) {
+				room.messages.shift();
 			}
 		}
 
@@ -37,16 +35,19 @@ export default class HTTPServer {
 				Logger.error("Room not found")
 				return;
 			}
+			let allOffline = true;
 			for (let i = 0; i < this._rooms[roomId].users.length; i++) {
 				if(this._rooms[roomId].users[i].id == user.id) {
-					this._rooms[roomId].users.splice(i, 1);
+					this._rooms[roomId].users[i].offline = true;
+					// this._rooms[roomId].users.splice(i, 1);
 				}
-				if(this._rooms[roomId].users.length == 0) {
-					Logger.log("Room empty, delete it ", roomId)
-					delete this._rooms[roomId];
-					delete this._messageHistory[roomId];
-					break;
+				if(!this._rooms[roomId].users[i].offline) {
+					allOffline = false;
 				}
+			}
+			if(this._rooms[roomId].users.length == 0 || allOffline) {
+				Logger.log("Room empty, delete it ", roomId);
+				delete this._rooms[roomId];
 			}
 		}
 		SocketServer.instance.installHandler(server, {prefix:"/sock"});
@@ -127,8 +128,7 @@ export default class HTTPServer {
 		this.app.get("/api/room/messages", (req, res) => {
 			let room = this._rooms[(<string>req.query.room).toLowerCase()];
 			if(room) {
-				let messages = this._messageHistory[room.name];
-				res.status(200).send(JSON.stringify({success:true, messages, room}));
+				res.status(200).send(JSON.stringify({success:true, messages:room.messages}));
 			}else{
 				res.status(404).send(JSON.stringify({success:false, code:"ROOM_NOT_FOUND", message:"Room not found, unable to load its chat messages"}));
 			}
@@ -143,13 +143,13 @@ export default class HTTPServer {
 			let roomName = req.body.room;
 			
 			let user:UserData = {
-				id:Utils.slugify(userName)+"_"+Utils.slugify(roomName),//uuidv4() //removed random uuid in favor to fix ID so we can retrieve chatMessages properly even after full logout/login
+				id:uuidv4(),
 				name:userName,
 				index:0,
 			};
 			let room = this._rooms[roomName.toLowerCase()];
 			let created = false;
-			if(room) console.log(room.users);
+			// if(room) console.log(room.users);
 
 			//Create room
 			if(!room) {
@@ -157,7 +157,9 @@ export default class HTTPServer {
 				this._rooms[roomName.toLowerCase()] = room = {
 					id:uuidv4(),
 					name:roomName,
-					users:[user]
+					users:[user],
+					messages:[],
+					currentStepIndex:0,
 				}
 			}else if(userId) {
 				let found = false;
@@ -170,19 +172,34 @@ export default class HTTPServer {
 				if(!found) {
 					res.status(301).send(JSON.stringify({success:false, code:"SESSION_NOT_FOUND", message:"Unable to restore session !"}));
 				}
-			}else if(room.users.length < 3) {
+			}else {
+				let reconnectingUser = false;
 				for (let i = 0; i < room.users.length; i++) {
-					if(room.users[i].name.toLowerCase().trim() == userName.toLowerCase().trim()) {
-						res.status(301).send(JSON.stringify({success:false, code:"USERNAME_USED", message:"User name "+userName+" is already used in this room"}));
-						return;
+					if(room.users[i].name.toLowerCase().trim() == userName.toLowerCase().trim() && room.users[i].offline) {
+						user = room.users[i];
+						reconnectingUser = true;
 					}
 				}
-				user.index = room.users.length;
-				room.users.push(user);
-			}else{
-				res.status(301).send(JSON.stringify({success:false, code:"ROOM_FULL", message:"Room is already full"}));
-				return;
+				//New user ?
+				if(!reconnectingUser) {
+					if(room.users.length == 3) {
+						res.status(301).send(JSON.stringify({success:false, code:"ROOM_FULL", message:"Room is already full"}));
+						return;
+					}
+
+					//Place is available, check if user isn't already in (and online)
+					for (let i = 0; i < room.users.length; i++) {
+						if(room.users[i].name.toLowerCase().trim() == userName.toLowerCase().trim()) {
+							res.status(301).send(JSON.stringify({success:false, code:"USERNAME_USED", message:"User name "+userName+" is already used in this room"}));
+							return;
+						}
+					}
+
+					user.index = room.users.length;
+					room.users.push(user);
+				}
 			}
+			user.offline = false;
 			SocketServer.instance.addToGroup(room.name, user);
 			res.status(200).send(JSON.stringify({success:true, room:this._rooms[roomName.toLowerCase()], me:user, created}));
 			// SocketServer.instance.sendToGroup(room.id, {action:SOCK_ACTIONS.JOIN_ROOM, data:user});

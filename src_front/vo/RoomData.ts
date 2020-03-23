@@ -4,4 +4,6 @@ export default interface RoomData {
     name:string;
     id:string;
     users:UserData[];
+    messages:any[];
+    currentStepIndex:number;
 }

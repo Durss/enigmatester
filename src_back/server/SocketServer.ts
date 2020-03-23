@@ -108,7 +108,7 @@ export default class SocketServer {
 	 * Updates a users' group
 	 */
 	public addToGroup(id:string, user:UserData):void {
-		// console.log("Add user "+user.name+" to group "+id);
+		console.log("Add user "+user.name+" to group "+id);
 		if(!this._groupIdToUsers[id]) {
 			this._groupIdToUsers[id] = [];
 		}
@@ -117,6 +117,7 @@ export default class SocketServer {
 		for (let i = 0; i < users.length; i++) {
 			this._userIdToGroupId[users[i].id] = id;
 		}
+		console.log(this._groupIdToUsers[id])
 	}
 
 	/**
@@ -127,7 +128,7 @@ export default class SocketServer {
 		let users = this._groupIdToUsers[groupId];
 		if(!users) return;
 		for (let i = 0; i < users.length; i++) {
-			if(exceptUserID && users[i].id == exceptUserID) continue;
+			if(exceptUserID && users[i].id == exceptUserID || users[i].offline) continue;
 			this.sendTo(users[i], msg);
 		}
 	}
@@ -162,10 +163,10 @@ export default class SocketServer {
 				return;
 			}else{
 				if(this._DISABLED) return;
-				Logger.info("Socket message : "+LogStyle.Reset+json.action);
 				let uid = this._connectionToUid[ conn.id ];
 				let group = this._userIdToGroupId[ uid ];
 				if(uid && group) {
+					Logger.info("Socket message : "+LogStyle.Reset+json.action);
 					Logger.simpleLog("uid:"+uid+"    group:"+group);
 					let exclude = uid;
 					if(json.includeSelf === true) exclude = null;
@@ -221,7 +222,6 @@ export default class SocketServer {
 				this.sendToGroup(this._userIdToGroupId[uid], {action:SOCK_ACTIONS.LEAVE_ROOM, data:user}, user.id);
 			}
 		}
-	}
 	}
 }
 
