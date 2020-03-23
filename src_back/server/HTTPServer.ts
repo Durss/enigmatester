@@ -20,9 +20,17 @@ export default class HTTPServer {
 		this.app = <Express>express();
 		let server = http.createServer(<any>this.app);
 		
-		SocketServer.instance.onDeleteGroup = (groupId:string) => {
-			Logger.log("Group empty, delete it ", groupId)
-			delete this._rooms[groupId];
+		SocketServer.instance.onDeleteUser = (roomId:string, user:UserData) => {
+			Logger.log("Remove user", user.name, "from room", roomId)
+			for (let i = 0; i < this._rooms[roomId].users.length; i++) {
+				if(this._rooms[roomId].users[i].id == user.id) {
+					this._rooms[roomId].users.splice(i, 1);
+				}
+				if(this._rooms[roomId].users.length == 0) {
+					Logger.log("Group empty, delete it ", roomId)
+					delete this._rooms[roomId];
+				}
+			}
 		}
 		SocketServer.instance.installHandler(server, {prefix:"/sock"});
 		server.listen(Config.SOCKET_SERVER_PORT, '0.0.0.0');
@@ -110,6 +118,8 @@ export default class HTTPServer {
 			};
 			let room = this._rooms[roomName.toLowerCase()];
 			let created = false;
+			if(room) console.log(room.users);
+
 			//Create room
 			if(!room) {
 				created = true;

@@ -9,7 +9,7 @@ import Config from "../utils/Config";
 
 export default class SocketServer {
 
-	public onDeleteGroup:Function;
+	public onDeleteUser:Function;
 
 	private static _instance: SocketServer;
 	private _DISABLED: boolean = false;
@@ -197,12 +197,7 @@ export default class SocketServer {
 						if(users[i].id == uid) {
 							user = users[i]
 							users.splice(i, 1);
-						}
-					}
-					if(users.length == 0) {
-						delete this._groupIdToUsers[groupId];
-						if(this.onDeleteGroup) {
-							this.onDeleteGroup(groupId);
+							this.onDeleteUser(groupId, user);
 						}
 					}
 					if(user) {
