@@ -21,7 +21,7 @@
 				<input type="text" id="roomField" placeholder="room..." class="input dark" v-model="room" @keyup.esc="room=''" maxlength="20">
 			</div>
 
-			<Button title="Start" type="submit" class="submit" :disabled="!room || room.length < 3 || !name || name.length < 3" :loading="loading" />
+			<Button title="Start" type="submit" class="submit" :disabled="!canSubmit" :loading="loading" />
 
 		</form>
 	</div>
@@ -43,6 +43,10 @@ export default class Home extends Vue {
 	public room:string = "";
 	public loading:boolean = false;
 
+	public get canSubmit():boolean {
+		return this.room && this.room.length >= 3 && this.name && this.name.length >= 3;
+	}
+
 	public mounted():void {
 		
 	}
@@ -52,6 +56,8 @@ export default class Home extends Vue {
 	}
 
 	public async onSubmitForm():Promise<void> {
+		if(!this.canSubmit) return;
+		
 		this.loading = true;
 		try {
 			let res = await Api.post("room/join", {name:this.name, room:this.room});
