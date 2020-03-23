@@ -55,7 +55,7 @@ export default class SockController extends EventDispatcher {
 		this._sockjs.onmessage = (message:string)=> this.onMessage(message);
 		this._sockjs.onopen = ()=> this.onConnect();
 
-		// window.addEventListener('beforeunload', _=> this.disconnect());
+		window.addEventListener('beforeunload', _=> this.disconnect());
 	}
 
 	public disconnect() {

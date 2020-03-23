@@ -169,6 +169,9 @@ export default class SocketServer {
 					if(json.includeSelf === true) exclude = null;
 					json.from = uid;
 					this.sendToGroup(group, json, exclude);
+					if(json.action == SOCK_ACTIONS.LEAVE_ROOM) {
+						this.onClose(conn);
+					}
 				}
 				// this.broadcast(json);
 			}
@@ -179,6 +182,7 @@ export default class SocketServer {
 	}
 
 	private onClose(conn:Connection):void {
+		conn.close();
 		if(this._DISABLED) return;
 		Logger.info("Socket connexion closed : "+LogStyle.Reset+conn.id);
 		//Cleanup user's connection from memory
