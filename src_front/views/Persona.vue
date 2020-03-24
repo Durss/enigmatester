@@ -15,6 +15,7 @@ import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-propert
 import UserData from '../vo/UserData';
 import gsap from 'gsap';
 import RoomData from '../vo/RoomData';
+import Config from '../utils/Config';
 
 @Component({
 	components:{}
@@ -25,6 +26,7 @@ export default class Persona extends Vue {
 	
 	private nextHandler:any;
 	private pause:boolean = false;
+	private complete:boolean = false;
 	private disposed:boolean = false;
 	private dialIndex:number = 0;
 	private charIndex:number = 0;
@@ -58,7 +60,7 @@ export default class Persona extends Vue {
 		
 		`Excellent travail !
 		Vous avez compris comment procéder, maintenant passons à la seconde étape.
-		Liez la ^terre¤ et l'^eau¤`,
+		Liez la ^terre¤ et l'^eau¤ entre eux.`,
 		
 		null,
 		
@@ -70,6 +72,26 @@ export default class Persona extends Vue {
 		
 		`Parfait !
 		Dernière étape, il ne vous reste qu'à lier le ^feu¤ à la ^terre¤.`,
+		
+		null,
+		
+		`Bravo !
+		Les 4 éléments sont maintenant liés entre eux !
+		Il ne reste qu'à tous les lier au 5ème élément pour accomplir notre mission`,
+
+		`Allez c'est bon panique pas j'ai méga la flemme de coder cette logique.
+		C'est donc terminé !`,
+		
+		`❤ Merslip pour le test bébé ❤`,
+		`Arrête de cliquer c'est fini j'ai dit`,
+		`...`,
+		`😒`,
+		`😒🖕`,
+		`🖕😒🖕`,
+		`😠`,
+		`🖕🖕🖕😠🖕🖕🖕
+
+		T'ARRÊTE J'AI DIT !`,
 	]
 
 	public mounted():void {
@@ -81,7 +103,10 @@ export default class Persona extends Vue {
 				for (let i = 0; i < this.dialogues.length; i++) {
 					const d = this.dialogues[i];
 					if(d == null) nullCount ++;
-					if(nullCount == stepIndex) this.dialIndex = i;
+					if(nullCount == stepIndex) {
+						this.dialIndex = i + 1;
+						break;
+					}
 				}
 			}
 			this.charIndex = 0;
@@ -103,13 +128,16 @@ export default class Persona extends Vue {
 	}
 
 	private onNext(e:any):void {
-		if(e.keyCode == 27) {
+		if(this.complete) return;
+
+		if(e.keyCode == 27 && this.$store.state.room.currentStepIndex < Config.STEPS.length) {
 			this.$emit("complete");
 			return;
 		}
 		if(this.charIndex < this.dialogues[this.dialIndex].length * .2) return;
 		this.dialIndex ++;
 		this.charIndex = 0;
+		
 		if(this.dialIndex == this.dialogues.length || this.dialogues[this.dialIndex] == null) {
 			this.pause = true;
 			this.message = null;
@@ -123,7 +151,7 @@ export default class Persona extends Vue {
 	}
 
 	private enterFrame():void {
-		if(this.disposed || this.pause) return;
+		if(this.disposed || this.pause || this.complete) return;
 
 		requestAnimationFrame(()=> this.enterFrame());
 		
@@ -134,7 +162,11 @@ export default class Persona extends Vue {
 		mess = mess.replace(/\{pseudo\}/gi, this.$store.state.me.name);
 		
 		if(this.charIndex > mess.length) {
-			this.pause = true;
+			if(this.dialIndex == this.dialogues.length-1) {
+				this.complete = true;
+			}else{
+				this.pause = true;
+			}
 			return;
 		}
 

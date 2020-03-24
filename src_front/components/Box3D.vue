@@ -188,9 +188,10 @@ export default class Box3D extends Vue {
 		if(Config.ENABLE_INTRO_ANIMATIONS) {
 			this.intro = true;
 			this._camera.position.y = 2000;
+			let endCameraDist = this.cameraDistance;
 			this.cameraDistance = 1500;
 			gsap.registerPlugin(SlowMo, RoughEase, CustomEase);
-			gsap.to(this, {duration:3, cameraDistance:200, ease:"sine.inOut"});
+			gsap.to(this, {duration:3, cameraDistance:endCameraDist, ease:"sine.inOut"});
 			gsap.to(this, {duration:4,
 							angleH:Math.PI*2.5,
 							ease:CustomEase.create("custom", "M0,0,C0.194,0.126,0.29,0.4,0.33,0.52,0.366,0.63,0.483,1.027,0.67,1.028,0.768,1.028,0.804,0.966,1,1"),

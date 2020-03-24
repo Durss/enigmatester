@@ -82,7 +82,7 @@ export default class FileSelector extends Vue {
 		}
 		
 		this.renderWheel();
-		
+		console.log("Mount files, set event listeners")
 		this._mouseDownHandler = (e:MouseEvent) => this.onMouseDown(e);
 		this._mouseUpHandler = (e:MouseEvent) => this.onMouseUp(e);
 		this._mouseMoveHandler = (e:MouseEvent) => this.onMouseMove(e);
@@ -214,6 +214,7 @@ export default class FileSelector extends Vue {
 	 * Scroll carousel
 	 */
 	private onMouseWheel(event:MouseWheelEvent):void {
+		console.log(event);
 		this.angle -= Math.abs(event.deltaY)/event.deltaY * (Math.PI*2)/this.keys.length;
 	}
 

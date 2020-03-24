@@ -1,5 +1,5 @@
 <template>
-	<div class="currentgoal">
+	<div class="currentgoal" v-if="enabled">
 		<p class="title">Objectif</p>
 		<img :src="require('@/assets/icons/elem_'+elem1+'.svg')" class="elem">
 		<div class="arrow">⟷</div>
@@ -21,6 +21,10 @@ export default class CurrentGoal extends Vue {
 	}
 	public get elem2():string{
 		return Config.STEPS[this.$store.state.room.currentStepIndex].elements[1];
+	}
+
+	public get enabled():boolean {
+		return this.$store.state.room.currentStepIndex < Config.STEPS.length;
 	}
 
 	public mounted():void {

@@ -19,7 +19,7 @@ export default class Config {
 	
 	public static get SERVER_PORT(): number {
 		return this.getEnvData({
-			dev: 3005,
+			dev: 3006,
 			prod: document.location.port,
 		});
 	}
@@ -69,7 +69,7 @@ export default class Config {
 			{
 				elements:["water", "air"],
 				angles:[[7,9],null],
-				faceIndex:[0,null],
+				faceIndex:[3,null],
 				targets:[{x:92, y:189},null],
 			},
 			{

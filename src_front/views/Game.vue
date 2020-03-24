@@ -43,6 +43,8 @@ import SockController, { SOCK_ACTIONS } from '../controller/SockController';
 import Api from '../utils/Api';
 import SocketEvent from '../vo/SocketEvent';
 import gsap from 'gsap';
+import { MESSAGE_TYPE } from '../vo/ChatMessageData';
+import RoomData from '../vo/RoomData';
 
 @Component({
 	components:{
@@ -149,6 +151,15 @@ export default class Game extends Vue {
 			let res = await Api.post("user/ready", {state:isReady, uid:this.$store.state.me.id, room:this.$store.state.room.name});
 			if(res.success) {
 				//all good
+				if(res.goNextStep) {
+					let stepIndex = (<RoomData>this.$store.state.room).currentStepIndex + 1;
+					let data = {
+						type:MESSAGE_TYPE.SPLITTER,
+						from:this.$store.state.me.id,
+						stepIndex
+					}
+					SockController.instance.sendMessage({action:SOCK_ACTIONS.SEND_MESSAGE, includeSelf:true, data});
+				}
 			}else{
 				this.$store.state.alert = "Unable to update your current state :(<br />"+res.message;
 			}

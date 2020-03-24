@@ -130,6 +130,7 @@ export default class ChatView extends Vue {
 				flex-direction: row;
 				align-items: center;
 				text-transform: capitalize;
+				opacity: .8;
 				// color: darken(@mainColor_warn, 10%);
 				&:not(:last-child) {
 					margin-right: 5px;
