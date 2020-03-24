@@ -49,31 +49,34 @@ export default class Config {
 
 	public static get ELEMENTS():string [] { return ["fire", "water", "earth", "air"]; }
 
+	public static BOX_WIDTH:number = 468;
+	public static BOX_HEIGHT:number = 672;
+
 	public static get STEPS():{elements:string[], angles:number[][], faceIndex:number[], targets:{x:number, y:number}[]} [] {
 		return [
 			{
 				elements:["fire", "air"],
 				angles:[[2,1], null],
 				faceIndex:[0, null],
-				targets:[{x: 496, y:484}, null],
+				targets:[{x: 275, y:331}, null],
 			},
 			{
 				elements:["earth", "water"],
 				angles:[[9,8],[2,2]],
 				faceIndex:[0,2],
-				targets:[{x:497, y:483},{x:580, y:402}],
+				targets:[{x:275, y:331},{x:356, y:248}],
 			},
 			{
 				elements:["water", "air"],
 				angles:[[7,9],null],
 				faceIndex:[0,null],
-				targets:[{x:313, y:341},null],
+				targets:[{x:92, y:189},null],
 			},
 			{
 				elements:["fire", "earth"],
 				angles:[[8,4],[1,2]],
 				faceIndex:[3,2],
-				targets:[{x:354, y:440},{x:574, y:397}],
+				targets:[{x:92, y:189},{x:353, y:249}],
 			}
 		];
 	}

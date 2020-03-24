@@ -139,7 +139,7 @@ export default class Box3D extends Vue {
 		this._camera.position.z = this.cameraDistance;
 		this._renderer = new THREE.WebGLRenderer({ alpha: true, antialias:true });
 		this._renderer.setSize(width, height);
-		let sideRatio = 0.69597615499254843517138599105812;
+		let sideRatio = Config.BOX_WIDTH/Config.BOX_HEIGHT;;
 		let cubeH = 150;
 		let cubeW = cubeH*sideRatio;
 		this._cubeGeom = new THREE.BoxGeometry(cubeW, cubeH, cubeW);
@@ -180,7 +180,7 @@ export default class Box3D extends Vue {
 			let vFOV = THREE.MathUtils.degToRad( this._camera.fov );
 			h = 2 * Math.tan( vFOV / 2 ) * distanceToFrontFace;
 			h = cubeH/h * document.body.clientHeight;
-		}while(h > 672 || ++loopCount > 10000)
+		}while(h > Config.BOX_HEIGHT || ++loopCount > 10000)
 		
 
 

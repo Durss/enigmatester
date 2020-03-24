@@ -16,11 +16,11 @@
 			<img src="@/assets/loader/loader_white.svg" class="loader">
 		</div>
 
-		<div v-if="ready && !showGame">
-			<Persona @complete="showGame = true;" />
+		<div v-if="ready && !showGame || forcePersona">
+			<Persona @complete="onPersonaComplete()" />
 		</div>
 
-		<div class="content" v-if="ready && showGame">
+		<div class="content" ref="content" v-if="ready && showGame">
 			<Reticle @updateCenterPos="setReticlePos" />
 			<Box3D :playerIndex="playerIndex" class="content" @updateCubeFace="updateCubeFace" />
 			<FileSelector :playerIndex="playerIndex" class="content" />
@@ -42,6 +42,7 @@ import Persona from './Persona.vue';
 import SockController, { SOCK_ACTIONS } from '../controller/SockController';
 import Api from '../utils/Api';
 import SocketEvent from '../vo/SocketEvent';
+import gsap from 'gsap';
 
 @Component({
 	components:{
@@ -55,12 +56,12 @@ import SocketEvent from '../vo/SocketEvent';
 export default class Game extends Vue {
 
 	public playerReady:boolean = false;
+	public forcePersona:boolean = false;
 	public playerIndex:number = 0;
 	public showGame:boolean = false;
-	public reticleTarget:{x:number, y:number} = null;
+	public reticleTarget:{x:number, y:number} = {x:0, y:0};
 	public faceIndex:number = 0;
 	public readyStateDelay:number = 0;
-	public nextStepHandler:any;
 
 	public ELEMENTS:string[] = Config.ELEMENTS;
 
@@ -80,17 +81,27 @@ export default class Game extends Vue {
 
 	public mounted():void {
 		this.playerIndex = (<UserData>this.$store.state.me).index;
-		this.nextStepHandler = (e:SocketEvent) => this.onNextStep(e);
-		// SockController.instance.addEventListener(SOCK_ACTIONS.NEXT_STEP, this.nextStepHandler);
 	}
 
 	public beforeDestroy():void {
-		// SockController.instance.removeEventListener(SOCK_ACTIONS.NEXT_STEP, this.nextStepHandler);
+	}
+
+	public onPersonaComplete():void {
+		this.forcePersona = false;
+		if(this.showGame) {
+			gsap.to(this.$refs.content, {opacity:1, duration:.5});
+		}else{
+			this.showGame = true;
+		}
 	}
 
 	public setReticlePos(pos:DOMRect):void {
 		// console.log("Reticle pos : ", pos.x, pos.y);
-		this.reticleTarget = pos;
+		let topLeft = {x:0, y:0};
+		topLeft.x = ((document.body.clientWidth-400) - Config.BOX_WIDTH) *.5
+		topLeft.y = (document.body.clientHeight - Config.BOX_HEIGHT) *.5
+		this.reticleTarget.x = pos.x - topLeft.x;
+		this.reticleTarget.y = pos.y - topLeft.y;
 		this.checkComplete();
 	}
 
@@ -125,7 +136,7 @@ export default class Game extends Vue {
 		clearTimeout(this.readyStateDelay);
 		if(isReady && !force) {
 			//Wait a second before sending a ready state so it's not too easy to find the right
-			//reticle's spot by just dragging it over the box
+			//reticle's spot by just dragging it all over the box
 			this.readyStateDelay = setTimeout(_=> this.sendReadyState(isReady, true), 1000);
 			return;
 		}
@@ -138,7 +149,6 @@ export default class Game extends Vue {
 			let res = await Api.post("user/ready", {state:isReady, uid:this.$store.state.me.id, room:this.$store.state.room.name});
 			if(res.success) {
 				//all good
-				SockController.instance.sendMessage({action:SOCK_ACTIONS.USER_READY, includeSelf:true, data:{user:this.$store.state.me.id, ready:isReady}});
 			}else{
 				this.$store.state.alert = "Unable to update your current state :(<br />"+res.message;
 			}
@@ -149,8 +159,8 @@ export default class Game extends Vue {
 	
 	@Watch("$store.state.room.currentStepIndex")
 	public onNextStep(e:SocketEvent):void {
-		console.log("STEP CHANGE")
-		this.showGame = false;
+		this.forcePersona = true;
+		gsap.to(this.$refs.content, {opacity:0, duration:.5});
 	}
 
 }

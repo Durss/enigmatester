@@ -64,7 +64,7 @@ export default class Persona extends Vue {
 		
 		`Très bien !
 		Lions maintenant l'^eau¤ à l'^air¤.
-		Je m'occupe de me lier à l'eau.`,
+		Je m'occupe de me lier à l'eau, faites en sorte qu'il se lie à moi.`,
 		
 		null,
 		
@@ -74,7 +74,7 @@ export default class Persona extends Vue {
 
 	public mounted():void {
 		
-		gsap.from(this.$refs.perso, {duration:2, opacity:0, ease:"sine.easein", onComplete:_=> {
+		gsap.from(this.$refs.perso, {duration:1, opacity:0, ease:"sine.easein", onComplete:_=> {
 			let stepIndex = (<RoomData>this.$store.state.room).currentStepIndex;
 			if(stepIndex > 0) {
 				let nullCount = 0;
@@ -85,7 +85,7 @@ export default class Persona extends Vue {
 				}
 			}
 			this.charIndex = 0;
-			this.message = this.dialogues[this.dialIndex].replace(/\r|\n/gi, '<br />').replace(/\{pseudo\}/gi, this.$store.state.me.name);
+			// this.message = this.dialogues[this.dialIndex].replace(/\r|\n/gi, '<br />').replace(/\{pseudo\}/gi, this.$store.state.me.name);
 			gsap.from(this.$refs.dialogue, {opacity:0, duration:1});
 			this.enterFrame();
 		}})
@@ -111,14 +111,19 @@ export default class Persona extends Vue {
 		this.dialIndex ++;
 		this.charIndex = 0;
 		if(this.dialIndex == this.dialogues.length || this.dialogues[this.dialIndex] == null) {
-			this.$emit("complete");
+			this.pause = true;
+			this.message = null;
+			gsap.to(this.$refs.perso, {duration:1, opacity:0, ease:"sine.easein", onComplete:_=> {
+				this.$emit("complete");
+			}});
 		}else{
 			this.pause = false;
+			this.enterFrame();
 		}
 	}
 
 	private enterFrame():void {
-		if(this.disposed) return;
+		if(this.disposed || this.pause) return;
 
 		requestAnimationFrame(()=> this.enterFrame());
 		
@@ -161,6 +166,7 @@ export default class Persona extends Vue {
 	position: relative;
 	width: 100vw;
 	height: 100vh;
+	z-index: 1000;
 
 	.perso {
 		position: absolute;
