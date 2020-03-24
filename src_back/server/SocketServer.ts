@@ -42,7 +42,7 @@ export default class SocketServer {
 		if(this._DISABLED) return;
 		this._sockjs = sockjs.createServer({log: (severity, message)=> {
 			if(severity == "debug") {
-				Logger.success(message+" on port "+Config.SOCKET_SERVER_PORT);
+				Logger.success(message+" on port "+Config.SERVER_PORT);
 				return;
 			}
 		}});

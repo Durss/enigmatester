@@ -51,7 +51,9 @@ export default class HTTPServer {
 			}
 		}
 		SocketServer.instance.installHandler(server, {prefix:"/sock"});
-		server.listen(Config.SOCKET_SERVER_PORT, '0.0.0.0');
+		server.listen(Config.SERVER_PORT, '0.0.0.0', null, ()=> {
+			Logger.success("Server ready on port " + Config.SERVER_PORT + " :: server name \"" + Config.SERVER_NAME + "\"");
+		});
 
 		this.app.use(historyApiFallback({
 			index:'/'+Config.SERVER_NAME+"/index.html",
@@ -76,10 +78,6 @@ export default class HTTPServer {
 	}
 
 	protected doPrepareApp(): void {
-		let server = new http.Server(<any>this.app);
-		server.listen(this.port, "localhost", null, ()=> {
-			Logger.success("Server ready on port " + Config.SERVER_PORT + " :: server name \"" + Config.SERVER_NAME + "\"");
-		});
 
 		this.app.use(<any>bodyParser.urlencoded({ extended: true }));
 		this.app.use(<any>bodyParser.json({limit: '10mb'}));
@@ -236,7 +234,7 @@ export default class HTTPServer {
 					allGood = false;
 				}
 			}
-			res.status(200).send(JSON.stringify({success:true, room}));
+			res.status(200).send(JSON.stringify({success:true, room, goNextStep:allGood}));
 			if(allGood) {
 				//Broadcast to group that current step is complete
 				room.currentStepIndex ++;

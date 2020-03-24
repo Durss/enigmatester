@@ -18,17 +18,17 @@ export default class Config {
 
 	public static get SERVER_PORT(): number {
 		return this.getEnvData({
-			dev: 3005,
-			prod: 3005,
-		});
-	}
-
-	public static get SOCKET_SERVER_PORT(): number {
-		return this.getEnvData({
 			dev: 3006,
 			prod: 3006,
 		});
 	}
+
+	// public static get SOCKET_SERVER_PORT(): number {
+	// 	return this.getEnvData({
+	// 		dev: 3006,
+	// 		prod: 3006,
+	// 	});
+	// }
 	
 	public static get PUBLIC_PATH(): string {
 		return this.getEnvData({
