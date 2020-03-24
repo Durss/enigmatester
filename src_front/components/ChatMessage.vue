@@ -1,5 +1,5 @@
 <template>
-	<div class="chatmessage" v-if="elementIcons" :data-self="isFromSelf()">
+	<div :class="classes" v-if="elementIcons" :data-self="isFromSelf()">
 
 		<div v-if="data.type==TYPE_ELEMS_TO_CONST" class="content">
 			<img :src="elementIcons('./elem_'+data.elem1+'.svg')" class="icon">
@@ -28,7 +28,12 @@
 			</div>
 		</div>
 
-		<div class="userName">{{userFrom.name}}</div>
+		<div v-if="data.type==TYPE_SPLITTER" class="content">
+			<p class="label">Étape {{data.stepIndex}}</p>
+			<div class="line"></div>
+		</div>
+
+		<div class="userName" v-if="data.type!=TYPE_SPLITTER">{{userFrom.name}}</div>
 	</div>
 </template>
 
@@ -48,12 +53,21 @@ export default class ChatMessage extends Vue {
 	public TYPE_ELEMS_TO_CONST:string = MESSAGE_TYPE.ELEMS_TO_CONST;
 	public TYPE_CONST_TO_STAR:string = MESSAGE_TYPE.CONST_TO_STAR;
 	public TYPE_CONST_TO_ANGLES:string = MESSAGE_TYPE.CONST_TO_ANGLES;
+	public TYPE_SPLITTER:string = MESSAGE_TYPE.SPLITTER;
 
 	public get userFrom():string {
 		let userList = this.$store.state.room.users;
 		for (let i = 0; i < userList.length; i++) {
 			if(userList[i].id == this.data.from) return userList[i];
 		}
+	}
+
+	public get classes():string[] {
+		let res = ["chatmessage"];
+		if(this.data.type == MESSAGE_TYPE.SPLITTER) {
+			res.push("splitter");
+		}
+		return res;
 	}
 
 	public round(v):string {
@@ -91,6 +105,7 @@ export default class ChatMessage extends Vue {
 	margin-bottom: 10px;
 	display: flex;
 	flex-direction: column;
+	box-sizing: border-box;
 
 	&[data-self='true'] {
 		align-self: flex-start;
@@ -99,6 +114,33 @@ export default class ChatMessage extends Vue {
 		background-color: @mainColor_highlight_light;
 		.userName {
 			align-self: flex-start;
+		}
+	}
+
+	&.splitter {
+		background: none;
+		width: 100%;
+		padding: 0;
+		max-width: 100%;
+		border-radius: 0;
+		background-color: none;
+		position: relative;
+		.content {
+			justify-content: center;
+			align-content: center;
+			text-align: center;
+			.line {
+				height: 2px;
+				width: 100%;
+				position: absolute;
+				background-color: @mainColor_normal;
+			}
+			.label {
+				z-index: 1;
+				padding: 5px;
+				font-weight: bold;
+				background-color: @mainColor_light;
+			}
 		}
 	}
 
@@ -116,6 +158,7 @@ export default class ChatMessage extends Vue {
 		flex-direction: row;
 		align-items: center;
 		flex-wrap: wrap;
+
 		.icon {
 			width: 30px;
 			padding: 5px;
