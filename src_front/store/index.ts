@@ -99,7 +99,12 @@ export default new Vuex.Store({
 		},
 
 		onNextStep(state, payload) {
-			(<RoomData>state.room).currentStepIndex ++;
+			let room = <RoomData>state.room;
+			//Reset users state
+			for (let i = 0; i < room.users.length; i++) {
+				room.users[i].currentStepDone = false;
+			}
+			room.currentStepIndex ++;
 		}
 
 	},

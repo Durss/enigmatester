@@ -245,6 +245,8 @@ export default class HTTPServer {
 				for (let i = 0; i < room.users.length; i++) {
 					room.users[i].currentStepDone = false;
 				}
+			}else{
+				SocketServer.instance.sendToGroup(room.name, {action:SOCK_ACTIONS.USER_READY, data:{user:userId, ready:state}});
 			}
 		})
 
