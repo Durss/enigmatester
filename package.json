@@ -12,6 +12,7 @@
     "server/build": "tsc -p ./tsconfig_server.json"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
     "concurrently": "^5.1.0",
     "express-serve-static-core": "^0.1.1",
     "sockjs": "^0.3.20",
