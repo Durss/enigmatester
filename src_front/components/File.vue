@@ -29,7 +29,8 @@ export default class File extends Vue {
 	public dragStart:{x:number, y:number} = {x:0, y:0};
 	public dragOffset:{x:number, y:number} = {x:0, y:0};
 	public pos:{x:number, y:number} = {x:0, y:0};
-	public center:{x:number, y:number} = {x:0, y:0};;
+	public center:{x:number, y:number} = {x:0, y:0};
+	public timeoutWheel:number = 0;
 
 	private _mouseDownHandler:any;
 	private _mouseUpHandler:any;
@@ -61,7 +62,14 @@ export default class File extends Vue {
 	/**
 	 * Zoom file
 	 */
-	private onMouseWheel(event:MouseWheelEvent):void {
+	private onMouseWheel(event:MouseWheelEvent, force:boolean = false):void {
+		clearTimeout(this.timeoutWheel);
+		if(!force) {
+			this.timeoutWheel = setTimeout(()=> {
+				this.onMouseWheel(event, true);
+			}, 10);
+			return;
+		}
 		let speed = 1;
 		if(event.ctrlKey) speed *= 5;
 		if(event.shiftKey) speed /= 10;

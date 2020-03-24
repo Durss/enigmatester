@@ -44,11 +44,13 @@ export default class FileSelector extends Vue {
 	private radius:number = 80;
 	private center:{x:number, y:number} = {x:0, y:0};
 	private offsetY:number = 70;
+	private timeoutWheel:number = 0;;
 
 	private _mouseDownHandler:any;
 	private _mouseUpHandler:any;
 	private _mouseMoveHandler:any;
 	private _mouseWheelHandler:any;
+	private _keyDownHandler:any;
 
 
 	public async mounted():Promise<void> {
@@ -82,15 +84,17 @@ export default class FileSelector extends Vue {
 		}
 		
 		this.renderWheel();
-		console.log("Mount files, set event listeners")
+		console.log("Mount files, set event listeners");
 		this._mouseDownHandler = (e:MouseEvent) => this.onMouseDown(e);
 		this._mouseUpHandler = (e:MouseEvent) => this.onMouseUp(e);
 		this._mouseMoveHandler = (e:MouseEvent) => this.onMouseMove(e);
 		this._mouseWheelHandler = (e:MouseWheelEvent) => this.onMouseWheel(e);
+		this._keyDownHandler = (e:KeyboardEvent) => this.onKeyDown(e);
 		this.carousel = <HTMLDivElement>this.$refs.carousel;
 		this.carousel.addEventListener("mousedown", this._mouseDownHandler);
 		document.addEventListener("mouseup", this._mouseUpHandler);
 		document.addEventListener("mousemove", this._mouseMoveHandler);
+		document.addEventListener("keydown", this._keyDownHandler);
 		this.carousel.addEventListener("wheel", this._mouseWheelHandler);
 	}
 
@@ -99,6 +103,7 @@ export default class FileSelector extends Vue {
 		this.carousel.removeEventListener("mousedown", this._mouseDownHandler);
 		document.removeEventListener("mouseup", this._mouseUpHandler);
 		document.removeEventListener("mousemove", this._mouseMoveHandler);
+		document.removeEventListener("keydown", this._keyDownHandler);
 		this.carousel.removeEventListener("wheel", this._mouseWheelHandler);
 	}
 
@@ -138,6 +143,12 @@ export default class FileSelector extends Vue {
 		
 		//Round carousel to proper position
 		this.roundAngle();
+	}
+
+	public onKeyDown(event:KeyboardEvent):void {
+		let step = (Math.PI*2)/(this.keys.length);
+		if(event.keyCode == 37) this.angle += step;
+		if(event.keyCode == 39) this.angle -= step;
 	}
 
 	/**
@@ -213,8 +224,14 @@ export default class FileSelector extends Vue {
 	/**
 	 * Scroll carousel
 	 */
-	private onMouseWheel(event:MouseWheelEvent):void {
-		console.log(event);
+	private onMouseWheel(event:MouseWheelEvent, force:boolean = false):void {
+		clearTimeout(this.timeoutWheel);
+		if(!force) {
+			this.timeoutWheel = setTimeout(()=> {
+				this.onMouseWheel(event, true);
+			}, 10);
+			return;
+		}
 		this.angle -= Math.abs(event.deltaY)/event.deltaY * (Math.PI*2)/this.keys.length;
 	}
 
