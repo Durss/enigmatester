@@ -18,11 +18,12 @@
 			<ChatMessage :data="m" v-for="m in messageList" :key="m.id" class="message" />
 		</div>
 		
-		<FormView v-if="showForm" class="form" />
+		<FormView v-if="showForm && showSend" class="form" @close="closeForm()" />
+		<AskInfo v-if="showForm && showAsk" class="form" @close="closeForm()" />
 
 		<div class="form" v-if="!showForm">
-			<Button title="Envoyer info" class="submit" @click="sendInfos()" />
-			<Button title="Envoyer message" class="submit" @click="sendInfos()" />
+			<Button title="📢 Envoyer une info" class="submit" @click="sendInfos()" />
+			<Button title="🙋 Demander une info" class="submit" @click="askInfo()" />
 		</div>
 	</div>
 </template>
@@ -37,10 +38,12 @@ import UserData from '../vo/UserData';
 import Config from '../utils/Config';
 import FormView from './FormView.vue';
 import CurrentGoal from './CurrentGoal.vue';
+import AskInfo from './AskInfo.vue';
 
 @Component({
 	components:{
 		Button,
+		AskInfo,
 		FormView,
 		CurrentGoal,
 		ChatMessage
@@ -48,7 +51,9 @@ import CurrentGoal from './CurrentGoal.vue';
 })
 export default class ChatView extends Vue {
 
-	private showForm:boolean = true;
+	private showForm:boolean = false;
+	private showAsk:boolean = false;
+	private showSend:boolean = false;
 
 	public ELEMENTS:string[] = Config.ELEMENTS;
 
@@ -88,8 +93,19 @@ export default class ChatView extends Vue {
 	}
 
 	public sendInfos():void {
-		this.$emit("sendinfo");
 		this.showForm = true;
+		this.showSend = true;
+	}
+
+	public askInfo():void {
+		this.showForm = true;
+		this.showAsk = true;
+	}
+
+	public closeForm():void {
+		this.showForm = false;
+		this.showAsk = false;
+		this.showSend =false;
 	}
 
 }
@@ -195,10 +211,13 @@ export default class ChatView extends Vue {
 
 	.form {
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
 		border-top: 1px solid @mainColor_dark;
-		*> {
-			flex-grow: 1;
+		* {
+			margin: 10px;
+			&:last-child {
+				margin-top: 0;
+			}
 		}
 	}
 }

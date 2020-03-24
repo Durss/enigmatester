@@ -1,5 +1,5 @@
 <template>
-	<div :class="classes" v-if="elementIcons" :data-self="isFromSelf()">
+	<div :class="classes" v-if="elementIcons">
 
 		<div v-if="data.type==TYPE_ELEMS_TO_CONST" class="content">
 			<img :src="elementIcons('./elem_'+data.elem1+'.svg')" class="icon">
@@ -33,6 +33,10 @@
 			<div class="line"></div>
 		</div>
 
+		<div v-if="data.type==TYPE_HELP" class="content help">
+			<p class="label">{{data.message}}</p>
+		</div>
+
 		<div class="userName" v-if="data.type!=TYPE_SPLITTER">{{userFrom.name}}</div>
 	</div>
 </template>
@@ -54,6 +58,7 @@ export default class ChatMessage extends Vue {
 	public TYPE_CONST_TO_STAR:string = MESSAGE_TYPE.CONST_TO_STAR;
 	public TYPE_CONST_TO_ANGLES:string = MESSAGE_TYPE.CONST_TO_ANGLES;
 	public TYPE_SPLITTER:string = MESSAGE_TYPE.SPLITTER;
+	public TYPE_HELP:string = MESSAGE_TYPE.HELP;
 
 	public get userFrom():string {
 		let userList = this.$store.state.room.users;
@@ -67,6 +72,12 @@ export default class ChatMessage extends Vue {
 		if(this.data.type == MESSAGE_TYPE.SPLITTER) {
 			res.push("splitter");
 		}
+		if(this.data.type == MESSAGE_TYPE.HELP) {
+			res.push("help");
+		}
+		if(this.data.from == this.$store.state.me.id) {
+			res.push("fromSelf");
+		}
 		return res;
 	}
 
@@ -74,10 +85,6 @@ export default class ChatMessage extends Vue {
 		let res:number =  Math.round(parseInt(v));
 		res = Math.min(Math.max(res, 1), 9);
 		return res.toString();
-	}
-
-	public isFromSelf():boolean {
-		return this.data.from == this.$store.state.me.id;
 	}
 
 	public mounted():void {
@@ -95,7 +102,7 @@ export default class ChatMessage extends Vue {
 @import (reference) '../less/_includes.less';
 .chatmessage{
 
-	background-color: @mainColor_light_extralight;
+	background-color: @mainColor_warn_extralight;
 	padding: 10px;
 	border-radius: 25px;
 	max-width: 75%;
@@ -107,7 +114,11 @@ export default class ChatMessage extends Vue {
 	flex-direction: column;
 	box-sizing: border-box;
 
-	&[data-self='true'] {
+	&.help {
+		background-color: @mainColor_light_extralight;
+	}
+
+	&.fromSelf {
 		align-self: flex-start;
 		border-bottom-left-radius: 0;
 		border-bottom-right-radius: 25px;
