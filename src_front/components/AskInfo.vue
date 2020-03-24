@@ -37,7 +37,7 @@ export default class AskInfo extends Vue {
 		let messages = [
 			"J'ai besoin du nom de la constellation",
 			"J'ai besoin du nom de l'étoile",
-			"J'ai besoin des valeurs A et B'",
+			"J'ai besoin des valeurs A et B",
 		];
 		let data = {
 			type:MESSAGE_TYPE.HELP,
