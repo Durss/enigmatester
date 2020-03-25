@@ -73,7 +73,9 @@ export default class File extends Vue {
 		let speed = 1;
 		if(event.ctrlKey) speed *= 5;
 		if(event.shiftKey) speed /= 10;
-		this.zoom -= Math.abs(event.deltaY)/event.deltaY * .1 * speed;
+		let delta = event.deltaY == 0? event.deltaX : event.deltaY;
+		if(delta == 0) return;
+		this.zoom -= Math.abs(delta)/delta * .1 * speed;
 		this.zoom = Math.min(Math.max(.2, this.zoom),1);
 		// event.preventDefault();
 	}
