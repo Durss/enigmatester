@@ -2,7 +2,10 @@
 	<div class="currentgoal" v-if="enabled">
 		<p class="title">Objectif</p>
 		<img :src="require('@/assets/icons/elem_'+elem1+'.svg')" class="elem">
-		<div class="arrow">⟷</div>
+		<div class="arrows">
+			<div class="arrowR">⟶</div>
+			<div class="arrowL" v-if="arrowBackEnabled">⟵</div>
+		</div>
 		<img :src="require('@/assets/icons/elem_'+elem2+'.svg')" class="elem">
 	</div>
 </template>
@@ -25,6 +28,10 @@ export default class CurrentGoal extends Vue {
 
 	public get enabled():boolean {
 		return this.$store.state.room.currentStepIndex < Config.STEPS.length;
+	}
+
+	public get arrowBackEnabled():boolean {
+		return Config.STEPS[this.$store.state.room.currentStepIndex].targets[1] != null;
 	}
 
 	public mounted():void {
@@ -54,7 +61,7 @@ export default class CurrentGoal extends Vue {
 		margin-right: 20px;
 	}
 
-	.arrow {
+	.arrows {
 		margin: 0 10px;
 	}
 
