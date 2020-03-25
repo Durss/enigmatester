@@ -232,7 +232,9 @@ export default class FileSelector extends Vue {
 			}, 10);
 			return;
 		}
-		this.angle -= Math.abs(event.deltaY)/event.deltaY * (Math.PI*2)/this.keys.length;
+		let delta = event.deltaY == 0? event.deltaX : event.deltaY;
+		if(delta == 0) return;
+		this.angle -= Math.abs(delta)/delta * (Math.PI*2)/this.keys.length;
 	}
 
 	/**
