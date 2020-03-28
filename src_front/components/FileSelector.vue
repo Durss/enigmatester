@@ -51,6 +51,7 @@ export default class FileSelector extends Vue {
 	private _mouseMoveHandler:any;
 	private _mouseWheelHandler:any;
 	private _keyDownHandler:any;
+	private _resizeHandler:any;
 
 
 	public async mounted():Promise<void> {
@@ -90,12 +91,14 @@ export default class FileSelector extends Vue {
 		this._mouseMoveHandler = (e:MouseEvent) => this.onMouseMove(e);
 		this._mouseWheelHandler = (e:MouseWheelEvent) => this.onMouseWheel(e);
 		this._keyDownHandler = (e:KeyboardEvent) => this.onKeyDown(e);
+		this._resizeHandler = (e:KeyboardEvent) => this.onResize(e);
 		this.carousel = <HTMLDivElement>this.$refs.carousel;
 		this.carousel.addEventListener("mousedown", this._mouseDownHandler);
 		document.addEventListener("mouseup", this._mouseUpHandler);
 		document.addEventListener("mousemove", this._mouseMoveHandler);
 		document.addEventListener("keydown", this._keyDownHandler);
 		this.carousel.addEventListener("wheel", this._mouseWheelHandler);
+		window.addEventListener("resize", this._resizeHandler);
 	}
 
 	public beforeDestroy():void {
@@ -105,6 +108,14 @@ export default class FileSelector extends Vue {
 		document.removeEventListener("mousemove", this._mouseMoveHandler);
 		document.removeEventListener("keydown", this._keyDownHandler);
 		this.carousel.removeEventListener("wheel", this._mouseWheelHandler);
+		window.removeEventListener("resize", this._resizeHandler);
+	}
+
+	private onResize(e:Event):void {
+		let width = this.$el.clientWidth;
+		let height = this.$el.clientHeight;
+		this.center.x = (<HTMLDivElement>this.$el).getBoundingClientRect().width * .5;
+		this.center.y = document.body.clientHeight + this.radius - this.offsetY;
 	}
 
 	/**

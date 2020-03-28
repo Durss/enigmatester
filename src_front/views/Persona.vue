@@ -54,7 +54,7 @@ export default class Persona extends Vue {
 		A vous de trouver les informations utiles aux autres et à les leur partager.`,
 		
 		`Commençons par lier le ^feu¤ et l'^air¤.
-		Je m'occupe d'activer mon pont de liaison vers le feu, faites en sorte que le feu se lie à moi.`,
+		Je m'occupe d'activer mon pont de liaison vers le feu, ^faites en sorte que le feu active son pont de liaison vers moi¤.`,
 		
 		null,
 		

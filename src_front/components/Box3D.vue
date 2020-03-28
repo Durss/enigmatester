@@ -41,6 +41,7 @@ export default class Box3D extends Vue {
 	private _mouseDownHandler:any;
 	private _mouseUpHandler:any;
 	private _mouseMoveHandler:any;
+	private _resizeHandler:any;
 	private _canvas:HTMLCanvasElement;
 
 	public mounted():void {
@@ -208,9 +209,11 @@ export default class Box3D extends Vue {
 		this._mouseDownHandler = (e:MouseEvent) => this.onMouseDown(e);
 		this._mouseUpHandler = (e:MouseEvent) => this.onMouseUp(e);
 		this._mouseMoveHandler = (e:MouseEvent) => this.onMouseMove(e);
+		this._resizeHandler = (e:MouseEvent) => this.onResize(e);
 		document.addEventListener("mousedown", this._mouseDownHandler);
 		document.addEventListener("mouseup", this._mouseUpHandler);
 		document.addEventListener("mousemove", this._mouseMoveHandler);
+		window.addEventListener("resize", this._resizeHandler);
 	}
 
 	public beforeDestroy():void {
@@ -237,6 +240,15 @@ export default class Box3D extends Vue {
 		document.removeEventListener("mousedown", this._mouseDownHandler);
 		document.removeEventListener("mouseUp", this._mouseUpHandler);
 		document.removeEventListener("mouseMove", this._mouseMoveHandler);
+		window.removeEventListener("resize", this._resizeHandler);
+	}
+
+	private onResize(e:Event):void {
+		let width = this.$el.clientWidth;
+		let height = this.$el.clientHeight;
+		this._camera.aspect = width/height;
+		this._renderer.setSize(width, height);
+		this._camera.updateProjectionMatrix();
 	}
 
 	/**
