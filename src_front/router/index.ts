@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Game from '../views/Game.vue'
+import Alien from '../views/Alien.vue'
 
 Vue.use(VueRouter)
 
@@ -18,6 +19,11 @@ const routes = [
 		meta: {
 			needAuth: true,
 		}
+	},
+	{
+		path: '/alien',
+		name: 'alien',
+		component: Alien,
 	},
 	{
 		path: "*",

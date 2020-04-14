@@ -5,7 +5,10 @@ import store from './store';
 import './less/index.less';
 import { Route } from 'vue-router';
 import Config from './utils/Config';
+import gsap from "gsap";
+import { Draggable } from 'gsap/all';
 
+gsap.registerPlugin(Draggable);
 Vue.config.productionTip = false;
 Config.init();
 
