@@ -21,8 +21,8 @@ const routes = [
 		}
 	},
 	{
-		path: '/alien',
-		name: 'alien',
+		path: '/enigma2',
+		name: 'enigma2',
 		component: Alien,
 	},
 	{

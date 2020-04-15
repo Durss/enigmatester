@@ -38,6 +38,6 @@ export default class App extends Vue {
 
 <style scoped lang="less">
 .app{
-	padding-top: 20px;
+	// padding-top: 20px;
 }
 </style>
