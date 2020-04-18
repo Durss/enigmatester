@@ -430,4 +430,18 @@ export default class Utils {
 		function tod(nbr:number):string{ return nbr < 9? "0"+nbr : nbr.toString()}
 		return tod(date.getDate())+"/"+tod(date.getMonth()+1)+"/"+date.getFullYear()+" "+tod(date.getHours())+"h"+tod(date.getMinutes());
 	}
+
+	public static secondsToInputValue(seconds:number):string {
+		function tod(nbr:number):string{ return nbr <= 9? "0"+nbr : nbr.toString()}
+		let h = Math.floor(seconds/3600000);
+		let m = Math.floor((seconds-h*3600000)/60000);
+		let s = Math.round((seconds-h*3600000-m*60000)/1000);
+		return tod(h)+":"+tod(m)+":"+tod(s);
+	}
+
+	public static promisedTimeout(delay:number):Promise<void> {
+		return new Promise(function(resolve) {
+			setTimeout(_=>resolve(), delay);
+		})
+	}
 }

@@ -1,10 +1,12 @@
 <template>
 	<div class="alien">
+		<Timer :paused="timerPaused" class="timer" />
+
 		<div class="stock" ref="stock">
 			<AlienLetter v-for="v in numbers" :key="v" :value="v" class="letter" ref="number" :enabled="unlocked(v)" />
 		</div>
 
-		<div class="target" ref="target">
+		<div class="target" ref="target" v-if="!complete">
 			<div class="slot" ref="slot1" @click="clearSlot(1)">
 				<AlienLetter :value="n1" class="letter" isSlot="true" ref="slotLetter1" enabled="true" />
 			</div>
@@ -16,13 +18,13 @@
 			</div>
 		</div>
 
-		<div class="result" ref="result">
+		<div class="result" ref="result" v-if="!complete">
 			<AlienLetter v-for="v in result" :key="v+rand" isSlot="true" :value="v" class="letter" enabled="true" />
 		</div>
 
 		<div class="congrats" v-if="complete">🥳 CHAMPION 🥳</div>
 
-		<div class="objective" ref="objective" v-show="step > 0">
+		<div class="objective" ref="objective" v-show="step > 0 && !complete">
 			<AlienLetter v-for="v in objective" :key="v+rand" isSlot="true" :value="v" color="" class="letter" enabled="true" />
 		</div>
 	</div>
@@ -32,9 +34,11 @@
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
 import AlienLetter from '../components/AlienLetter.vue';
 import gsap, { Draggable, TweenLite } from 'gsap/all';
+import Timer from '../components/Timer.vue';
 
 @Component({
 	components:{
+		Timer,
 		AlienLetter,
 	}
 })
@@ -42,12 +46,13 @@ export default class Alien extends Vue {
 
 	public objective:number[]= [1,6];
 	public numbers:number[]= [0,1,2,3,4,5,6,7,8,9];
-	public numbersUnlocked:boolean[]= [true, true];
+	public numbersUnlocked:boolean[]= [true, true, false, false, false, true, false, false, false, false];
 	public n1:number|null = null;
 	public n2:number|null = null;
 	public n3:number|null = null;
 	public step:number = 0;
 	public complete:boolean = false
+	public timerPaused:boolean = false
 
 	public get rand():number { return Math.random(); }
 
@@ -124,6 +129,7 @@ export default class Alien extends Vue {
 		}else
 		if(this.result[0] == this.objective[0] && this.result[1] == this.objective[1] && this.result[2] == this.objective[2] && this.step == 2) {
 			this.complete = true;
+			this.timerPaused = true;
 		}
 	}
 
@@ -175,6 +181,16 @@ export default class Alien extends Vue {
 	max-width: 500px;
 	widows: 100%;
 	margin: auto;
+
+	.timer {
+		margin: auto;
+		display: block;
+		width: min-content;
+		margin-bottom: 10px;
+		padding-bottom: 5px;
+		border-bottom: 1px solid #FFEEDA;
+	}
+
 	.stock {
 		display: block;
 		margin: auto;

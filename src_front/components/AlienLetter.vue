@@ -1,7 +1,7 @@
 <template>
-	<div class="alienletter">
+	<div :class="classes">
 		<div :class="'circle' +(enabled?'':' dotted')" ref="circle" v-if="!isSlot"></div>
-		
+
 		<svg viewBox="0 0 101.5 109.3" v-if="enabled && computedValue == 0">
 			<path d="M63.3,23.1c-5.1,0-9.2,4.1-9.2,9.2c0.4,12.2,17.9,12.2,18.4,0C72.5,27.2,68.3,23.1,63.3,23.1z"/>
 			<path d="M46.9,18.3c-4,1.9-7.4,3.6-9.7,5.4c-0.6,0.5-1.1,0.9-1.6,1.4s-0.7,0.8-1.1,1.3c-0.6,0.9-1,1.8-1.2,2.6
@@ -214,6 +214,12 @@ export default class AlienLetter extends Vue {
 
 	public timelines:TimelineMax[];
 	public computedValue:number = null;
+
+	public get classes():any {
+		let res = ["alienletter"];
+		if(!this.enabled) res.push("disabled");
+		return res;
+	}
 	
 	public mounted():void {
 		this.computedValue = this.value;
@@ -456,6 +462,10 @@ export default class AlienLetter extends Vue {
 	box-sizing: border-box;
 	transition: padding .25s, border-width .25s;
 	position: relative;
+
+	&.disabled {
+		pointer-events: none;
+	}
 
 	.circle {
 		position: absolute;
