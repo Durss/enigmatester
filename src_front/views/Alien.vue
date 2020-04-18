@@ -1,29 +1,29 @@
 <template>
 	<div class="alien">
 		<div class="stock" ref="stock">
-			<AlienLetter v-for="v in numbers" :key="v" :value="v" class="letter" ref="number" />
+			<AlienLetter v-for="v in numbers" :key="v" :value="v" class="letter" ref="number" :enabled="unlocked(v)" />
 		</div>
 
 		<div class="target" ref="target">
 			<div class="slot" ref="slot1" @click="clearSlot(1)">
-				<AlienLetter :value="n1" class="letter" isSlot="true" ref="slotLetter1" />
+				<AlienLetter :value="n1" class="letter" isSlot="true" ref="slotLetter1" enabled="true" />
 			</div>
 			<div class="slot" ref="slot2" @click="clearSlot(2)">
-				<AlienLetter :value="n2" class="letter" isSlot="true" ref="slotLetter2" />
+				<AlienLetter :value="n2" class="letter" isSlot="true" ref="slotLetter2" enabled="true" />
 			</div>
-			<div class="slot" ref="slot3" @click="clearSlot(3)" v-show="step > 0">
-				<AlienLetter :value="n3" class="letter" isSlot="true" ref="slotLetter3" />
+			<div class="slot" ref="slot3" @click="clearSlot(3)" v-show="step > 1">
+				<AlienLetter :value="n3" class="letter" isSlot="true" ref="slotLetter3" enabled="true" />
 			</div>
 		</div>
 
 		<div class="result" ref="result">
-			<AlienLetter v-for="v in result" :key="v+rand" isSlot="true" :value="v" class="letter" />
+			<AlienLetter v-for="v in result" :key="v+rand" isSlot="true" :value="v" class="letter" enabled="true" />
 		</div>
 
 		<div class="congrats" v-if="complete">🥳 CHAMPION 🥳</div>
 
-		<div class="objective" ref="objective">
-			<AlienLetter v-for="v in objective" :key="v+rand" isSlot="true" :value="v" color="" class="letter" />
+		<div class="objective" ref="objective" v-show="step > 0">
+			<AlienLetter v-for="v in objective" :key="v+rand" isSlot="true" :value="v" color="" class="letter" enabled="true" />
 		</div>
 	</div>
 </template>
@@ -42,6 +42,7 @@ export default class Alien extends Vue {
 
 	public objective:number[]= [1,6];
 	public numbers:number[]= [0,1,2,3,4,5,6,7,8,9];
+	public numbersUnlocked:boolean[]= [true, true];
 	public n1:number|null = null;
 	public n2:number|null = null;
 	public n3:number|null = null;
@@ -53,11 +54,15 @@ export default class Alien extends Vue {
 	public get result():number[] {
 		if(this.n1==null && this.n2==null && this.n3==null) return [];
 		
-		let v = (this.n1 + this.n2) * (this.n3 || 1);
+		let n3 = this.n3 === null? 1 : this.n3;
+		let v = (this.n1 + this.n2) * n3;
 		let chunks = v.toString().split("");
 		let res = [];
 		for (let i = 0; i < chunks.length; i++) {
 			res.push(parseInt(chunks[i]));
+		}
+		if(v < 10 && !this.numbersUnlocked[v]) {
+			this.unlock(v);
 		}
 		return res;
 	}
@@ -100,8 +105,14 @@ export default class Alien extends Vue {
 		
 	}
 
+	public unlocked(v:number):boolean {
+		if(this.step > 0) return true;
+		return this.numbersUnlocked[v];
+	}
+
 	private checkComplete():void {
-		if(this.result[0] == this.objective[0] && this.result[1] == this.objective[1] && this.step == 0) {
+		if(this.step == 0) return;
+		if(this.result[0] == this.objective[0] && this.result[1] == this.objective[1] && this.step == 1) {
 			let targets = [this.$refs.target, this.$refs.result, this.$refs.objective];
 			gsap.to(targets, {opacity:0, duration:1, onComplete:_=>{
 				this.step ++;
@@ -111,7 +122,7 @@ export default class Alien extends Vue {
 				gsap.to(targets, {opacity:1, duration:1, delay:.25});
 			}});
 		}else
-		if(this.result[0] == this.objective[0] && this.result[1] == this.objective[1] && this.result[2] == this.objective[2] && this.step == 1) {
+		if(this.result[0] == this.objective[0] && this.result[1] == this.objective[1] && this.result[2] == this.objective[2] && this.step == 2) {
 			this.complete = true;
 		}
 	}
@@ -128,6 +139,29 @@ export default class Alien extends Vue {
 				this.n3 = null;
 				break;
 		}
+	}
+
+	private async unlock(v):Promise<any> {
+		this.numbersUnlocked[v] = true;
+		setTimeout(_=>{
+			this.n1 = null;
+			this.n2 = null;
+		}, 250);
+		let complete = this.numbersUnlocked.length == 10;
+		for (let i = 0; i < this.numbersUnlocked.length; i++) {
+			if(this.numbersUnlocked[i] !== true) complete = false;
+		}
+		if(complete) this.nextStep();
+		await this.$nextTick();
+		gsap.from(this.$refs.number[v].$el, {scale:0, duration:1, ease:"elastic.out(1, .4)", delay:.25})
+	}
+
+	private async nextStep():Promise<void> {
+		this.step ++;
+		await this.$nextTick();
+		
+		gsap.set(this.$refs.objective, {opacity:0});
+		gsap.to(this.$refs.objective, {opacity:1, duration:1});
 	}
 
 }
