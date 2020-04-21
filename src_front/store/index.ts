@@ -121,8 +121,6 @@ export default new Vuex.Store({
 			
 			state.initComplete = false;
 				
-			//From there we're sure the user has access wether because s-he's inside the
-			//local network of the company or because s-he logged in.
 			SockController.instance.connect();
 			
 			try {
