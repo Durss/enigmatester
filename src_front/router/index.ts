@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Game from '../views/Game.vue'
 import Alien from '../views/Alien.vue'
+import DiscsTest from '../views/DiscsTest.vue'
 
 Vue.use(VueRouter)
 
@@ -24,6 +25,11 @@ const routes = [
 		path: '/enigma2',
 		name: 'enigma2',
 		component: Alien,
+	},
+	{
+		path: '/discs',
+		name: 'discs',
+		component: DiscsTest,
 	},
 	{
 		path: "*",

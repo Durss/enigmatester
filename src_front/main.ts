@@ -6,9 +6,9 @@ import './less/index.less';
 import { Route } from 'vue-router';
 import Config from './utils/Config';
 import gsap from "gsap";
-import { Draggable } from 'gsap/all';
+import { Draggable, InertiaPlugin } from 'gsap/all';
 
-gsap.registerPlugin(Draggable);
+gsap.registerPlugin(Draggable,InertiaPlugin);
 Vue.config.productionTip = false;
 Config.init();
 
