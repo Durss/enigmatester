@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Game from '../views/Game.vue'
 import Alien from '../views/Alien.vue'
+import AudioTest from '../views/AudioTest.vue'
 import DiscsTest from '../views/DiscsTest.vue'
 
 Vue.use(VueRouter)
@@ -30,6 +31,11 @@ const routes = [
 		path: '/discs',
 		name: 'discs',
 		component: DiscsTest,
+	},
+	{
+		path: '/audio',
+		name: 'audio',
+		component: AudioTest,
 	},
 	{
 		path: "*",
