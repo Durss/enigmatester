@@ -1,6 +1,10 @@
 <template>
 	<div class="audiotest">
 		<canvas ref="render" class="canvas"></canvas>
+		<div class="reverse" @click="reverse = !reverse">
+			<Button type="checkbox" v-model="reverse" id="reverse" />
+			<label for="reverse">Reverse</label>
+		</div>
 		<Button @click="startRecording" title="🔴" v-if="!recording" />
 		<Button @click="stopRecording" title="⬜" v-if="recording" />
 		<!-- <Button @click="saveRecording" title="SAVE" />
@@ -30,6 +34,7 @@ export default class AudioTest extends Vue {
 	public ctx2D:CanvasRenderingContext2D = null;
 	public canvasDrawIndex:number = 0;
 	public canvasScrollIndex:number = 0;
+	public reverse:boolean = false;
 	public recording:boolean = false;
 
 	private stream:MediaStream;
@@ -77,7 +82,7 @@ export default class AudioTest extends Vue {
 			// let audio = new Audio(url);
 			// audio.play();
 			this.clearRecording();
-		}, "audio/wav", true, false, 1);
+		}, "audio/wav", true, this.reverse, 1);
 	}
 
 	public getBuffers():void {
@@ -93,8 +98,33 @@ export default class AudioTest extends Vue {
 			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		}
 
-		if (navigator.getUserMedia){
-			navigator.getUserMedia({audio:true}, 
+		let constraints:any = {
+			"audio": {
+				"mandatory": {
+				},
+				"optional": [
+					{"googEchoCancellation": "false"},
+					{"googAutoGainControl": "false"},
+					{"googNoiseSuppression": "false"},
+					{"googHighpassFilter": "false"}
+				]
+			},
+		}
+		// constraints = {audio:true, video:false};
+
+		if(navigator.mediaDevices) {
+			navigator.mediaDevices.getUserMedia(constraints)
+			.then( stream => {
+				this.stream = stream;
+				this.onStreamReady();
+				this.recording = true;
+				this.audioRecorder.start();
+			})
+			.catch(error => {
+				alert('Error capturing audio.');
+			});
+		} else if (!navigator.getUserMedia) {
+			navigator.getUserMedia(constraints, 
 			(stream) => {
 				this.stream = stream;
 				this.onStreamReady();
@@ -103,8 +133,7 @@ export default class AudioTest extends Vue {
 			},
 			(e) => {
 				alert('Error capturing audio.');
-			}
-			);
+			});
 
 		} else { alert('getUserMedia not supported in this browser.'); }
 	}
@@ -115,11 +144,12 @@ export default class AudioTest extends Vue {
 	}
 
 	private initRecorder():void {
-		console.log(this.inputPoint);
-		this.audioContext = new AudioContext();
+		//@ts-ignore
+		let ac = window.AudioContext || window.webkitAudioContext;//Fuck you apple for still prefixing shits...
+		this.audioContext = new ac();
 		this.audioInput = this.audioContext.createMediaStreamSource(this.stream);
 		this.inputPoint = this.audioContext.createGain();
-		this.inputPoint.gain.value = 3;
+		this.inputPoint.gain.value = 1;
 		this.analyserNode = this.audioContext.createAnalyser();
 		this.analyserNode.fftSize = this.FFT_SIZE;
 		this.inputPoint.connect( this.analyserNode );
@@ -194,6 +224,24 @@ export default class AudioTest extends Vue {
 		max-width: 90vw;
 		height: 150px;
 		margin-bottom: 15px;
+	}
+
+	.reverse {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		margin-bottom: 10px;
+		background-color: @mainColor_light;
+		padding: 5px;
+		border-radius: 7px;
+		cursor: pointer;
+		*> {
+			pointer-events: none;
+		}
+		label {
+			margin-left: 10px;
+			margin-bottom: 0;
+		}
 	}
 }
 </style>
