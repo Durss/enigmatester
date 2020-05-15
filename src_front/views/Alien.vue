@@ -188,7 +188,7 @@ export default class Alien extends Vue {
 		width: min-content;
 		margin-bottom: 10px;
 		padding-bottom: 5px;
-		border-bottom: 1px solid #FFEEDA;
+		border-bottom: 1px solid @mainColor_skin;
 	}
 
 	.stock {
@@ -251,7 +251,7 @@ export default class Alien extends Vue {
 		margin-bottom: 10px;
 		height: 110px;
 		&.result {
-			background-color: #FFEEDA;
+			background-color: @mainColor_skin;
 		}
 		&.objective {
 			.letter {

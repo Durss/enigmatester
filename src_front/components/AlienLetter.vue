@@ -245,7 +245,7 @@ export default class AlienLetter extends Vue {
 					angle:Math.random()*360,
 					magnitude:Math.random() + (this.isSlot?  2 : 1),
 					phase:0,
-					duration:Math.random() + (this.isSlot?  .25 : 2),
+					duration:Math.random() + (this.isSlot?  1 : 2),
 					start:0,
 					repeat:-1}))
 			};
@@ -455,6 +455,7 @@ export default class AlienLetter extends Vue {
 </script>
 
 <style scoped lang="less">
+@import (reference) '../less/_includes.less';
 .alienletter{
 	cursor: pointer;
 	padding: 15px;
@@ -472,7 +473,7 @@ export default class AlienLetter extends Vue {
 		top: 0;
 		left: 0;
 		border-radius: 50%;
-		border: 1px solid #FFEEDA;
+		border: 1px solid @mainColor_skin;
 		width: 100%;
 		height: 100%;
 		&.dotted {
@@ -488,7 +489,7 @@ export default class AlienLetter extends Vue {
 	svg {
 		width: 100%;
 		height: 100%;
-		fill: #FFEEDA;
+		fill: @mainColor_skin;
 	}
 }
 </style>

@@ -57,6 +57,6 @@ export default class Timer extends Vue {
 .timer{
 	font-size: 30px;
 	// text-align: center;
-	color: #FFEEDA;
+	color: @mainColor_skin;
 }
 </style>
