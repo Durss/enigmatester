@@ -2,7 +2,7 @@
 	<div class="nametest">
 		<div v-if="isMobile">
 			<div class="syllables">
-				<AlienLetter v-for="i in 9" :key="i" :value="i" isSlot="true" enabled="true" class="letter" @click.native="spell(i)" />
+				<AlienSymbol v-for="i in 9" :key="i" :value="i" isSlot="true" enabled="true" class="letter" @click.native="spell(i)" />
 			</div>
 			<RecorderButton ref="reccorderButton"
 			@touchstart.native="startrecording($event)"
@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
-import AlienLetter from '../components/AlienLetter.vue';
+import AlienSymbol from '../components/AlienSymbol.vue';
 import RecorderButton from '../components/RecorderButton.vue';
 import Recorder from '../utils/Recorder';
 import Utils from '../utils/Utils';
@@ -27,7 +27,7 @@ import Button from '../components/Button.vue';
 @Component({
 	components:{
 		Button,
-		AlienLetter,
+		AlienSymbol,
 		RecorderButton,
 	}
 })
@@ -73,7 +73,6 @@ export default class NameTest extends Vue {
 	public mounted():void {
 		this.sounds = require.context("@/assets/sounds");
 		let keys = this.sounds.keys();
-		console.log(keys);
 		let spells = ["./chourlih.mp3","./chritah.mp3","./kri.mp3","./krovah.mp3","./lorkah.mp3","./orrlah.mp3","./rrah.mp3","./soumdorh.mp3","./tharki.mp3"];
 		for (let i = 0; i < spells.length; i++) {
 			const element = spells[i];

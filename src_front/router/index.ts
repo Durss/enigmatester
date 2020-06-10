@@ -6,6 +6,7 @@ import Alien from '../views/Alien.vue'
 import AudioTest from '../views/AudioTest.vue'
 import DiscsTest from '../views/DiscsTest.vue'
 import NameTest from '../views/NameTest.vue'
+import AlientFontTest from '../views/AlientFontTest.vue'
 
 Vue.use(VueRouter)
 
@@ -42,6 +43,11 @@ const routes = [
 		path: '/name',
 		name: 'name',
 		component: NameTest,
+	},
+	{
+		path: '/font',
+		name: 'font',
+		component: AlientFontTest,
 	},
 	{
 		path: "*",

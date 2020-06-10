@@ -3,43 +3,43 @@
 		<Timer :paused="timerPaused" class="timer" />
 
 		<div class="stock" ref="stock">
-			<AlienLetter v-for="v in numbers" :key="v" :value="v" class="letter" ref="number" :enabled="unlocked(v)" />
+			<AlienSymbol v-for="v in numbers" :key="v" :value="v" class="letter" ref="number" :enabled="unlocked(v)" />
 		</div>
 
 		<div class="target" ref="target" v-if="!complete">
 			<div class="slot" ref="slot1" @click="clearSlot(1)">
-				<AlienLetter :value="n1" class="letter" isSlot="true" ref="slotLetter1" enabled="true" />
+				<AlienSymbol :value="n1" class="letter" isSlot="true" ref="slotLetter1" enabled="true" />
 			</div>
 			<div class="slot" ref="slot2" @click="clearSlot(2)">
-				<AlienLetter :value="n2" class="letter" isSlot="true" ref="slotLetter2" enabled="true" />
+				<AlienSymbol :value="n2" class="letter" isSlot="true" ref="slotLetter2" enabled="true" />
 			</div>
 			<div class="slot" ref="slot3" @click="clearSlot(3)" v-show="step > 1">
-				<AlienLetter :value="n3" class="letter" isSlot="true" ref="slotLetter3" enabled="true" />
+				<AlienSymbol :value="n3" class="letter" isSlot="true" ref="slotLetter3" enabled="true" />
 			</div>
 		</div>
 
 		<div class="result" ref="result" v-if="!complete">
-			<AlienLetter v-for="v in result" :key="v+rand" isSlot="true" :value="v" class="letter" enabled="true" />
+			<AlienSymbol v-for="v in result" :key="v+rand" isSlot="true" :value="v" class="letter" enabled="true" />
 		</div>
 
 		<div class="congrats" v-if="complete">🥳 CHAMPION 🥳</div>
 
 		<div class="objective" ref="objective" v-show="step > 0 && !complete">
-			<AlienLetter v-for="v in objective" :key="v+rand" isSlot="true" :value="v" color="" class="letter" enabled="true" />
+			<AlienSymbol v-for="v in objective" :key="v+rand" isSlot="true" :value="v" color="" class="letter" enabled="true" />
 		</div>
 	</div>
 </template>
 
 <script lang="ts">
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
-import AlienLetter from '../components/AlienLetter.vue';
+import AlienSymbol from '../components/AlienSymbol.vue';
 import gsap, { Draggable, TweenLite } from 'gsap/all';
 import Timer from '../components/Timer.vue';
 
 @Component({
 	components:{
 		Timer,
-		AlienLetter,
+		AlienSymbol,
 	}
 })
 export default class Alien extends Vue {
@@ -84,15 +84,15 @@ export default class Alien extends Vue {
 					let hits:boolean = false;
 					if(d.hitTest(slot1, "50%")) {
 						hits = true;
-						this.n1 = (<AlienLetter>element).value;
+						this.n1 = (<AlienSymbol>element).value;
 						this.checkComplete();
 					}else if(d.hitTest(slot2, "50%")) {
 						hits = true;
-						this.n2 = (<AlienLetter>element).value;
+						this.n2 = (<AlienSymbol>element).value;
 						this.checkComplete();
 					}else if(slot3 && d.hitTest(slot3, "50%")) {
 						hits = true;
-						this.n3 = (<AlienLetter>element).value;
+						this.n3 = (<AlienSymbol>element).value;
 						this.checkComplete();
 					}
 					if(hits) {

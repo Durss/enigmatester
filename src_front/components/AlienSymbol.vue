@@ -201,7 +201,7 @@ import gsap, { MorphSVGPlugin, TimelineMax, TweenLite, Linear } from 'gsap/all';
 	components:{
 	}
 })
-export default class AlienLetter extends Vue {
+export default class AlienSymbol extends Vue {
 
 	@Prop()
 	public value!:number;
