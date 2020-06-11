@@ -1,5 +1,8 @@
 <template>
 	<div class="alientfonttest">
+		<form @submit.prevent="onSubmit" class="form">
+			<textarea cols="30" rows="10" v-model="src"></textarea>
+		</form>
 		<AlienMessage :message="src" class="message" />
 	</div>
 </template>
@@ -7,15 +10,17 @@
 <script lang="ts">
 import { Component, Inject, Model, Prop, Vue, Watch, Provide } from "vue-property-decorator";
 import AlienMessage from '../components/AlienMessage.vue';
+import Button from '../components/Button.vue';
 
 @Component({
 	components:{
+		Button,
 		AlienMessage,
 	}
 })
 export default class AlientFontTest extends Vue {
 
-	// public text:string = "";
+	public inputValue:string = "";
 	// private src:string = "CHRIS / MR PUZZLE...";
 	private src:string = "I MAY CONSENT GIVING YOU MY SECRETS if yOu find mY name...";
 // 	private src:string = `yOu hAve proVen worthy...
@@ -26,41 +31,14 @@ export default class AlientFontTest extends Vue {
 // i stiLL havE onE
 // specifiC purposE you
 // hAven'T figurEd oUt,chris...`;
-	// private indices:number[] = [];
 	private disposed:boolean = false;
 
 	public mounted():void {
-		// this.indices = new Array(this.src.length);
-		// for (let i = 0; i < this.indices.length; i++) {
-		// 	let code = this.src.charCodeAt(i);
-		// 	if((code >= 65 && code <= 90) || (code >= 97 && code <= 122)) {
-		// 		let offset = this.src.charAt(i) == this.src.charAt(i).toUpperCase()? 65 : 97;
-		// 		this.indices[i] = offset + 25;
-		// 	}else{
-		// 		this.indices[i] = this.src.charCodeAt(i);
-		// 	}
-		// }
-
-		// this.loopLetters();
 	}
 
 	public beforeDestroy():void {
 		this.disposed = true;
 	}
-
-	// public loopLetters():void {
-	// 	let res = "";
-	// 	for (let i = 0; i < this.indices.length; i++) {
-	// 		let char = this.src.charCodeAt(i);
-	// 		res += String.fromCharCode( Math.round(this.indices[i]));
-	// 		this.indices[i] += (char - this.indices[i]) * .05;
-	// 	}
-	// 	this.text = res.replace(/#/gi, "<br />");
-	// 	if(!this.disposed) {
-	// 		setTimeout(_=> this.loopLetters(), 35);
-	// 	}
-
-	// }
 
 }
 </script>
@@ -70,9 +48,19 @@ export default class AlientFontTest extends Vue {
 .alientfonttest{
 	.message {
 		width: 100%;
-		position: absolute;
-		.center();
+		margin: auto;
+		margin-top: 50px;
+		// position: absolute;
+		// .center();
 		max-width: 650px;
+	}
+
+	.form {
+		margin: auto;
+		margin-top: 20px;
+		display: flex;
+		flex-direction: column;
+		width: 400px;
 	}
 }
 </style>

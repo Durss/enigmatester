@@ -16,11 +16,12 @@ import AlienMessageLetter from './AlienMessageLetter.vue';
 })
 export default class AlienMessage extends Vue {
 
-	@Prop({default:"this is a test"})
+	@Prop({default:""})
 	public message:string;
 
 	private letters:string = "";
 	private finalMessage:string = "";
+	private timeout:number;
 	private disposed:boolean = false;
 
 	public mounted():void {
@@ -34,7 +35,7 @@ export default class AlienMessage extends Vue {
 	public nextLetter():void {
 		this.letters += this.message.charAt(this.letters.length);
 		if(!this.disposed && this.letters.length < this.message.length) {
-			setTimeout(_=> this.nextLetter(), 60);
+			this.timeout = setTimeout(_=> this.nextLetter(), 60);
 		}
 
 	}
@@ -48,6 +49,14 @@ export default class AlienMessage extends Vue {
 			this.letters = "";
 			this.finalMessage = this.message.replace(/\n/gi, "<br />");
 		}
+	}
+
+	@Watch("message")
+	private onMessageUpdate():void {
+		this.letters = "";
+		this.finalMessage = "";
+		clearTimeout(this.timeout);
+		this.nextLetter();
 	}
 
 }
