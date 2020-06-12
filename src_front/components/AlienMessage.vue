@@ -1,6 +1,6 @@
 <template>
 	<div class="alienmessage">
-		<AlienMessageLetter v-for="(l, index) in letters" :key="index" :value="l" @complete="onLetterComplete(index)" />
+		<AlienMessageLetter v-for="(l, index) in letters" :key="index" :value="l" @complete="onLetterComplete(index)" :delay="index" />
 		<div v-html="finalMessage" class="finalMessage"></div>
 	</div>
 </template>
@@ -25,7 +25,8 @@ export default class AlienMessage extends Vue {
 	private disposed:boolean = false;
 
 	public mounted():void {
-		this.nextLetter();
+		this.letters = this.message;
+		// this.nextLetter();
 	}
 
 	public beforeDestroy():void {
@@ -56,7 +57,8 @@ export default class AlienMessage extends Vue {
 		this.letters = "";
 		this.finalMessage = "";
 		clearTimeout(this.timeout);
-		this.nextLetter();
+		this.letters = this.message;
+		// this.nextLetter();
 	}
 
 }

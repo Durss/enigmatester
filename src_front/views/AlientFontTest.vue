@@ -21,7 +21,8 @@ import Button from '../components/Button.vue';
 export default class AlientFontTest extends Vue {
 
 	public inputValue:string = "";
-	// private src:string = "CHRIS / MR PUZZLE...";
+// 	private src:string =  `CHris...
+// MR PUzzle...`;
 	private src:string = "I MAY CONSENT GIVING YOU MY SECRETS if yOu find mY name...";
 // 	private src:string = `yOu hAve proVen worthy...
 // my sEcrEts yOu shall nOw discovEr...`;
