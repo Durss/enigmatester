@@ -1,6 +1,6 @@
 <template>
 	<div class="alienmessage">
-		<AlienMessageLetter v-for="(l, index) in letters" :key="index" :value="l" @complete="onLetterComplete(index)" :delay="index" />
+		<AlienMessageLetter v-for="(l, index) in letters" :key="index" :value="l" @start="onStartLetter(index)" @complete="onLetterComplete(index)" :delay="index" />
 		<div v-html="finalMessage" class="finalMessage"></div>
 	</div>
 </template>
@@ -26,20 +26,24 @@ export default class AlienMessage extends Vue {
 
 	public mounted():void {
 		this.letters = this.message;
-		// this.nextLetter();
 	}
 
 	public beforeDestroy():void {
 		
 	}
 
-	public nextLetter():void {
-		this.letters += this.message.charAt(this.letters.length);
-		if(!this.disposed && this.letters.length < this.message.length) {
-			this.timeout = setTimeout(_=> this.nextLetter(), 60);
-		}
-
+	public restart():void {
+		this.onMessageUpdate();
 	}
+
+
+	/**
+	 * Called when a letter is starting to be displayed
+	 */
+	public onStartLetter(index:number):void {
+		this.$emit("onLetter");
+	}
+
 
 	/**
 	 * When animation completes, replace all divs by actual
@@ -58,7 +62,6 @@ export default class AlienMessage extends Vue {
 		this.finalMessage = "";
 		clearTimeout(this.timeout);
 		this.letters = this.message;
-		// this.nextLetter();
 	}
 
 }

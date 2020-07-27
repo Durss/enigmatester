@@ -39,7 +39,9 @@ export default class AlienMessageLetter extends Vue {
 		let conf = {template: "none.in", points:10, strength:2, clamp:false, randomize:true};
 		gsap.set(this.$el, {opacity:0});
 		gsap.to(this.$el, 0, {opacity:1, delay:delay});
-		gsap.to(this.$refs["tmp"], duration, {opacity:0, ease:RoughEase.ease.config(conf), delay:delay});
+		gsap.to(this.$refs["tmp"], duration, {opacity:0, ease:RoughEase.ease.config(conf), delay:delay, onStart:()=> {
+			this.$emit("start");
+		}});
 		gsap.from(this.$refs["good"], duration, {opacity:0, ease:RoughEase.ease.config(conf), delay:delay, onComplete:()=> {
 			this.$emit("complete");
 		}});

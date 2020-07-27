@@ -3,7 +3,12 @@
 		<form @submit.prevent="onSubmit" class="form">
 			<textarea cols="30" rows="10" v-model="src"></textarea>
 		</form>
-		<AlienMessage :message="src" class="message" />
+		<AlienMessage :message="src" class="message" @onLetter="onLetter()" ref="messageComp" />
+
+		<div class="uploadForm">
+			<div class="title">Upload sounds</div>
+			<input type="file" accept="audio/*" multiple @change="onFiles" ref="fileInput">
+		</div>
 	</div>
 </template>
 
@@ -20,6 +25,7 @@ import Button from '../components/Button.vue';
 })
 export default class AlientFontTest extends Vue {
 
+	public audios:HTMLAudioElement[] = [];
 	public inputValue:string = "";
 // 	private src:string =  `CHris...
 // MR PUzzle...`;
@@ -41,12 +47,34 @@ export default class AlientFontTest extends Vue {
 		this.disposed = true;
 	}
 
+	public onFiles(e):void {
+		let input:HTMLInputElement = <HTMLInputElement>this.$refs.fileInput;
+
+		for (let i = 0; i < input.files.length; i++) {
+			var reader = new FileReader();
+			reader.onload = (e) => {
+				let a = new Audio(<string>e.target.result);
+				this.audios.push(a);
+			};
+			reader.readAsDataURL(input.files[i]);
+		}
+		(<AlienMessage>this.$refs.messageComp).restart();
+	}
+
+	public onLetter():void {
+		if(this.audios.length == 0) return;
+
+		var item = this.audios[Math.floor(Math.random() * this.audios.length)];
+		item.play();
+	}
+
 }
 </script>
 
 <style scoped lang="less">
 @import (reference) '../less/_includes.less';
 .alientfonttest{
+	width: 100%;
 	.message {
 		width: 100%;
 		margin: auto;
@@ -62,6 +90,24 @@ export default class AlientFontTest extends Vue {
 		display: flex;
 		flex-direction: column;
 		width: 400px;
+	}
+
+	.uploadForm {
+		text-align: center;
+		margin-top: 50px;
+		padding: 15px;
+		border-radius: 15px;
+		left: 50%;
+		position: relative;
+		transform: translate(-50%, 0);
+		display: inline-block;
+		background-color: @mainColor_light;
+
+		.title {
+			font-size: 20px;
+			font-weight: bold;
+			margin-bottom: 10px;
+		}
 	}
 }
 </style>
