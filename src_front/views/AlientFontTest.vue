@@ -50,6 +50,7 @@ export default class AlientFontTest extends Vue {
 	public onFiles(e):void {
 		let input:HTMLInputElement = <HTMLInputElement>this.$refs.fileInput;
 
+		this.audios = [];
 		for (let i = 0; i < input.files.length; i++) {
 			var reader = new FileReader();
 			reader.onload = (e) => {
