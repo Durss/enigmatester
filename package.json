@@ -33,7 +33,7 @@
     "gsap": "file:gsap-bonus.tgz",
     "less": "^3.0.4",
     "less-loader": "^5.0.0",
-    "three": "^0.126.1",
+    "three": "^0.137.0",
     "typescript": "~3.7.5",
     "vue-property-decorator": "^8.4.1",
     "vue-template-compiler": "^2.6.11"
